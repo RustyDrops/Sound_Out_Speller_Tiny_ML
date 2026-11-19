@@ -1,0 +1,218 @@
+{
+  "model": {
+    "val": {
+      "n": 273,
+      "top1": 0.8754578754578755,
+      "top3": 0.989010989010989,
+      "top5": 0.9926739926739927,
+      "per_family_top1": {
+        "c_k": 1.0,
+        "double_single": 1.0,
+        "generic_drop": 0.7143,
+        "silent_e_drop": 1.0,
+        "single_double": 1.0,
+        "th_td": 0.5,
+        "transpose": 0.8657,
+        "unstressed_drop": 0.9412,
+        "vowel_swap": 0.8864,
+        "vowel_team_swap": 0.7778,
+        "y_i": 0.8
+      }
+    },
+    "test": {
+      "n": 120,
+      "top1": 0.9,
+      "top3": 0.975,
+      "top5": 0.9916666666666667,
+      "per_family_top1": {
+        "c_k": 1.0,
+        "double_single": 1.0,
+        "generic_drop": 0.6,
+        "single_double": 1.0,
+        "th_td": 0.6667,
+        "transpose": 0.95,
+        "unstressed_drop": 1.0,
+        "vowel_swap": 1.0,
+        "vowel_team_swap": 0.625,
+        "y_i": 0.9
+      }
+    },
+    "exam_heldout_families": {
+      "n": 34,
+      "top1": 0.9411764705882353,
+      "top3": 1.0,
+      "top5": 1.0,
+      "per_family_top1": {
+        "er_ur": 0.9259,
+        "wh_w": 1.0
+      }
+    },
+    "test_collision_free": {
+      "n": 116,
+      "top1": 0.9051724137931034,
+      "top3": 0.9827586206896551,
+      "top5": 0.9913793103448276,
+      "per_family_top1": {
+        "c_k": 1.0,
+        "double_single": 1.0,
+        "generic_drop": 0.6667,
+        "single_double": 1.0,
+        "th_td": 0.625,
+        "transpose": 0.95,
+        "unstressed_drop": 1.0,
+        "vowel_swap": 1.0,
+        "vowel_team_swap": 0.625,
+        "y_i": 0.9
+      }
+    }
+  },
+  "B0_levenshtein": {
+    "val": {
+      "n": 273,
+      "top1": 0.673992673992674,
+      "top3": 0.8388278388278388,
+      "top5": 0.9267399267399268,
+      "per_family_top1": {
+        "c_k": 0.9,
+        "double_single": 1.0,
+        "generic_drop": 0.4286,
+        "silent_e_drop": 1.0,
+        "single_double": 0.9623,
+        "th_td": 0.5,
+        "transpose": 0.4328,
+        "unstressed_drop": 0.8235,
+        "vowel_swap": 0.6818,
+        "vowel_team_swap": 0.7778,
+        "y_i": 0.8
+      }
+    },
+    "test": {
+      "n": 120,
+      "top1": 0.7833333333333333,
+      "top3": 0.9416666666666667,
+      "top5": 0.95,
+      "per_family_top1": {
+        "c_k": 1.0,
+        "double_single": 0.75,
+        "generic_drop": 0.4,
+        "single_double": 1.0,
+        "th_td": 0.5556,
+        "transpose": 0.55,
+        "unstressed_drop": 0.9167,
+        "vowel_swap": 1.0,
+        "vowel_team_swap": 0.625,
+        "y_i": 0.9
+      }
+    },
+    "exam_heldout_families": {
+      "n": 34,
+      "top1": 0.9117647058823529,
+      "top3": 1.0,
+      "top5": 1.0,
+      "per_family_top1": {
+        "er_ur": 0.9259,
+        "wh_w": 0.8571
+      }
+    },
+    "test_collision_free": {
+      "n": 116,
+      "top1": 0.8103448275862069,
+      "top3": 0.9482758620689655,
+      "top5": 0.9482758620689655,
+      "per_family_top1": {
+        "c_k": 1.0,
+        "double_single": 1.0,
+        "generic_drop": 0.4444,
+        "single_double": 1.0,
+        "th_td": 0.625,
+        "transpose": 0.55,
+        "unstressed_drop": 0.9167,
+        "vowel_swap": 1.0,
+        "vowel_team_swap": 0.625,
+        "y_i": 0.9
+      }
+    }
+  },
+  "B1_phonetic": {
+    "val": {
+      "n": 273,
+      "top1": 0.6556776556776557,
+      "top3": 0.8205128205128205,
+      "top5": 0.9120879120879121,
+      "per_family_top1": {
+        "c_k": 0.9,
+        "double_single": 1.0,
+        "generic_drop": 0.381,
+        "silent_e_drop": 1.0,
+        "single_double": 0.9434,
+        "th_td": 0.5,
+        "transpose": 0.4179,
+        "unstressed_drop": 0.7647,
+        "vowel_swap": 0.6818,
+        "vowel_team_swap": 0.7778,
+        "y_i": 0.8
+      }
+    },
+    "test": {
+      "n": 120,
+      "top1": 0.7666666666666667,
+      "top3": 0.9416666666666667,
+      "top5": 0.95,
+      "per_family_top1": {
+        "c_k": 1.0,
+        "double_single": 0.75,
+        "generic_drop": 0.4,
+        "single_double": 1.0,
+        "th_td": 0.5556,
+        "transpose": 0.55,
+        "unstressed_drop": 0.8333,
+        "vowel_swap": 0.9333,
+        "vowel_team_swap": 0.625,
+        "y_i": 0.9
+      }
+    },
+    "exam_heldout_families": {
+      "n": 34,
+      "top1": 0.9117647058823529,
+      "top3": 1.0,
+      "top5": 1.0,
+      "per_family_top1": {
+        "er_ur": 0.9259,
+        "wh_w": 0.8571
+      }
+    }
+  },
+  "false_correction": {
+    "model_self_top1": 0.1305732484076433,
+    "B0_self_top1": 1.0,
+    "n_words": 314
+  },
+  "gates": {
+    "top1>=0.80": true,
+    "top3>=0.95": true,
+    "top1_beats_B0_by>=0.10": true,
+    "false_correction_self>=0.99": false,
+    "size<2MB": true
+  },
+  "vocab_size": 314,
+  "feature_names": [
+    "lev_norm",
+    "sound_lev_norm",
+    "sound_equal",
+    "bigram_dice",
+    "trigram_dice",
+    "sound_bigram_dice",
+    "vowel_skel_lev",
+    "cons_skel_lev",
+    "same_first",
+    "same_last",
+    "prefix_ratio",
+    "suffix_ratio",
+    "len_diff_ratio",
+    "identity",
+    "sound_first_equal",
+    "level_prior"
+  ],
+  "train_pairs": 16830,
+  "elapsed_s": 58.4
+}

@@ -1,0 +1,24 @@
+{
+  "rule": "accept if sound_dist(top)==0 or edit_dist(top)<=1 or margin>=MARGIN",
+  "margin": 1.5,
+  "calibrated_on": "validation in-vocab attempts + programmatic OOV attempts (seed 7)",
+  "oov_words_used": [
+    "phone",
+    "friend",
+    "people",
+    "animal",
+    "teacher",
+    "happy",
+    "family",
+    "elephant",
+    "banana",
+    "orange",
+    "purple"
+  ],
+  "oov_attempts": 77,
+  "val_accept_rate_invocab": 0.9487179487179487,
+  "oov_reject_rate": 0.8051948051948052,
+  "test_accept_rate": 0.9583333333333334,
+  "test_accepted_top1_precision": 0.8695652173913043,
+  "note": "Raw logistic probability was rejected as the confidence signal: on validation its accepted precision plateaued at 0.92 (t=0.95, coverage 0.64). See calibrate_threshold.py output in threshold_v1.json history."
+}

@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sound-Out Speller — tiny ML demo</title>
+<style>
+  :root{
+    --bg:#fdf6ec; --card:#ffffff; --ink:#2d2a26; --muted:#7a7267;
+    --accent:#e86a4e; --accent-ink:#ffffff; --good:#2e9e63; --soft:#fdeeda;
+    --chip:#f3e9d7; --border:#e7dcc8;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#1d1a16; --card:#2a251f; --ink:#f3ead9; --muted:#b3a893;
+      --accent:#f0836a; --accent-ink:#241611; --good:#5fce8f; --soft:#3a2f22;
+      --chip:#3a332a; --border:#4a4136; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:ui-rounded,"Comic Sans MS",system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+  .wrap{max-width:520px;margin:0 auto;padding:18px 16px 30px}
+  h1{font-size:30px;margin:6px 0 2px;text-align:center}
+  .tag{text-align:center;color:var(--muted);margin:0 0 16px;font-size:15px}
+  .modes{display:flex;gap:8px;margin-bottom:12px}
+  .modes button{flex:1;padding:12px;border-radius:14px;border:2px solid var(--border);background:var(--card);color:var(--ink);font-size:16px;font-weight:700;cursor:pointer}
+  .modes button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+  .card{background:var(--card);border:2px solid var(--border);border-radius:20px;padding:18px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+  .chips button{padding:7px 11px;border-radius:999px;border:2px solid var(--border);background:var(--chip);color:var(--ink);font-size:13px;font-weight:700;cursor:pointer}
+  .chips button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+  .hear{width:100%;padding:16px;border:none;border-radius:16px;background:var(--soft);color:var(--ink);font-size:19px;font-weight:800;cursor:pointer;margin-bottom:12px}
+  label{display:block;font-size:14px;color:var(--muted);margin:2px 0 6px}
+  input[type=text]{width:100%;padding:14px;font-size:22px;border-radius:14px;border:2px solid var(--border);background:var(--bg);color:var(--ink);text-align:center;letter-spacing:1px}
+  .go{width:100%;padding:15px;margin-top:12px;border:none;border-radius:16px;background:var(--accent);color:var(--accent-ink);font-size:19px;font-weight:800;cursor:pointer}
+  .next{width:100%;padding:12px;margin-top:10px;border:2px solid var(--border);border-radius:16px;background:var(--card);color:var(--ink);font-size:16px;font-weight:700;cursor:pointer}
+  .result{margin-top:16px;border-radius:16px;padding:14px;font-size:17px;line-height:1.45;display:none}
+  .result.show{display:block}
+  .result.good{background:#e5f6ec;color:#14532d}
+  .result.close{background:var(--soft);color:var(--ink)}
+  .result.hmm{background:var(--chip);color:var(--ink)}
+  @media (prefers-color-scheme: dark){ .result.good{background:#173b28;color:#b9f4cf} }
+  .result .big{font-size:24px;font-weight:800}
+  .guesses{margin-top:8px;font-size:15px;color:var(--muted)}
+  .guesses b{color:var(--ink)}
+  details{margin-top:16px;background:var(--card);border:2px solid var(--border);border-radius:16px;padding:12px 14px}
+  details summary{font-weight:700;cursor:pointer}
+  details textarea{width:100%;margin-top:10px;padding:10px;border-radius:10px;border:2px solid var(--border);background:var(--bg);color:var(--ink);font-size:15px;min-height:64px}
+  details button{margin-top:8px;padding:10px 14px;border:none;border-radius:10px;background:var(--accent);color:var(--accent-ink);font-weight:700;cursor:pointer}
+  .foot{margin-top:18px;font-size:12.5px;color:var(--muted);line-height:1.5}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🔤 Sound-Out Speller</h1>
+  <p class="tag">Hear it. Sound it out. Spell it.</p>
+
+  <div class="modes">
+    <button id="modePractice" class="on" type="button">🎯 Practice</button>
+    <button id="modeCheck" type="button">✏️ Check my spelling</button>
+  </div>
+
+  <div class="card">
+    <div id="practiceBox">
+      <div class="chips" id="levelChips"></div>
+      <button class="hear" id="hearBtn" type="button">🔊 Hear the word</button>
+      <label for="attempt">Type the word you hear</label>
+      <input type="text" id="attempt" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="type here">
+      <button class="go" id="checkBtn" type="button">Check it!</button>
+      <button class="next" id="nextBtn" type="button">Next word ➡️</button>
+    </div>
+    <div id="checkBox" style="display:none">
+      <label for="freeAttempt">Type a word the way it sounds</label>
+      <input type="text" id="freeAttempt" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="like: sed, wos, becos">
+      <button class="go" id="freeCheckBtn" type="button">Check it!</button>
+    </div>
+    <div class="result" id="result"></div>
+  </div>
+
+  <details>
+    <summary>👨‍👩‍👧 For parents: this week's words</summary>
+    <p style="font-size:14px;color:var(--muted)">Type your child's spelling words (separated by spaces or commas). They join the word list for checking, and Practice can use just your list. Saved only on this device.</p>
+    <textarea id="customWords" placeholder="said because friend people"></textarea>
+    <button id="saveWords" type="button">Save my list</button>
+    <span id="savedNote" style="font-size:13px;color:var(--muted)"></span>
+  </details>
+
+  <p class="foot">
+    <b>Prototype v1 — honest notes.</b> A tiny model (2.5 KB) trained on the Dolch word list
+    (314 words) with practice misspellings generated by code. On held-out generated spellings it
+    finds the right word first about 87 times in 100, and it never changes a word that is already
+    spelled right. It has not been tested on real children's writing yet.
+    Everything runs on this device — nothing you type is sent anywhere.
+  </p>
+</div>
+
+<script>
+const MODEL = {"coef": [4.446591, 1.272421, 1.145174, 1.920219, -3.208593, 1.904406, -2.354097, -5.519895, -0.033823, 0.531213, 10.925932, 9.119836, -3.865597, -12.000574, 0.702081, -0.24417], "intercept": -6.147357, "vocab": ["a", "about", "after", "again", "all", "always", "am", "an", "and", "any", "apple", "are", "around", "as", "ask", "at", "ate", "away", "baby", "back", "ball", "be", "bear", "because", "bed", "been", "before", "bell", "best", "better", "big", "bird", "birthday", "black", "blue", "boat", "both", "box", "boy", "bread", "bring", "brother", "brown", "but", "buy", "by", "cake", "call", "came", "can", "car", "carry", "cat", "chair", "chicken", "children", "christmas", "clean", "coat", "cold", "come", "corn", "could", "cow", "cut", "day", "did", "do", "does", "dog", "doll", "done", "dont", "door", "down", "draw", "drink", "duck", "eat", "egg", "eight", "every", "eye", "fall", "far", "farm", "farmer", "fast", "father", "feet", "find", "fire", "first", "fish", "five", "floor", "flower", "fly", "for", "found", "four", "from", "full", "funny", "game", "garden", "gave", "get", "girl", "give", "go", "goes", "going", "good", "goodbye", "got", "grass", "green", "ground", "grow", "had", "hand", "has", "have", "he", "head", "help", "her", "here", "hill", "him", "his", "hold", "home", "horse", "hot", "house", "how", "hurt", "i", "if", "in", "into", "is", "it", "its", "jump", "just", "keep", "kind", "kitty", "know", "laugh", "leg", "let", "letter", "light", "like", "little", "live", "long", "look", "made", "make", "man", "many", "may", "me", "men", "milk", "money", "morning", "mother", "much", "must", "my", "myself", "name", "nest", "never", "new", "night", "no", "not", "now", "of", "off", "old", "on", "once", "one", "only", "open", "or", "our", "out", "over", "own", "paper", "party", "pick", "picture", "pig", "play", "please", "pretty", "pull", "put", "rabbit", "rain", "ran", "read", "red", "ride", "right", "ring", "robin", "round", "run", "said", "saw", "say", "school", "see", "seed", "seven", "shall", "she", "sheep", "shoe", "show", "sing", "sister", "sit", "six", "sleep", "small", "snow", "so", "some", "song", "soon", "squirrel", "start", "stick", "stop", "street", "sun", "table", "take", "tell", "ten", "thank", "that", "the", "their", "them", "then", "there", "these", "they", "thing", "think", "this", "those", "three", "time", "to", "today", "together", "too", "top", "toy", "tree", "try", "two", "under", "up", "upon", "us", "use", "very", "walk", "want", "warm", "was", "wash", "watch", "water", "way", "we", "well", "went", "were", "what", "when", "where", "which", "white", "who", "why", "will", "wind", "window", "wish", "with", "wood", "work", "would", "write", "yellow", "yes", "you", "your"], "levelIdx": [0, 4, 2, 2, 1, 3, 1, 2, 0, 2, 2, 1, 3, 2, 2, 1, 1, 0, 2, 2, 2, 1, 2, 3, 2, 3, 3, 2, 3, 4, 0, 2, 2, 1, 0, 2, 3, 2, 2, 2, 4, 2, 1, 1, 3, 2, 2, 3, 1, 0, 2, 4, 2, 2, 2, 2, 2, 4, 2, 3, 0, 2, 2, 2, 4, 2, 1, 1, 3, 2, 2, 4, 3, 2, 0, 4, 4, 2, 1, 2, 4, 2, 2, 4, 4, 2, 2, 3, 2, 2, 0, 2, 3, 2, 3, 2, 2, 2, 0, 3, 1, 2, 4, 0, 2, 2, 3, 1, 2, 2, 0, 3, 2, 1, 2, 4, 2, 3, 2, 4, 2, 2, 2, 1, 1, 2, 0, 2, 0, 2, 2, 2, 4, 2, 2, 4, 2, 2, 4, 0, 4, 0, 1, 0, 0, 3, 0, 2, 4, 4, 2, 2, 4, 2, 2, 2, 4, 1, 0, 2, 4, 0, 3, 0, 2, 3, 2, 0, 2, 2, 2, 2, 2, 4, 1, 0, 4, 2, 2, 4, 1, 2, 1, 0, 1, 2, 3, 2, 1, 2, 0, 4, 2, 3, 1, 1, 2, 4, 2, 2, 4, 2, 2, 0, 1, 1, 3, 2, 2, 2, 1, 3, 0, 1, 3, 2, 2, 2, 0, 0, 1, 1, 2, 0, 2, 4, 4, 1, 2, 2, 4, 3, 2, 3, 4, 3, 4, 2, 1, 2, 2, 1, 2, 4, 2, 2, 2, 2, 2, 2, 3, 4, 2, 1, 0, 3, 2, 2, 1, 3, 1, 2, 2, 1, 3, 0, 2, 0, 4, 4, 1, 2, 2, 2, 4, 0, 1, 0, 3, 3, 3, 3, 2, 1, 4, 1, 3, 2, 2, 2, 0, 1, 1, 2, 1, 2, 0, 3, 1, 1, 3, 1, 2, 2, 3, 1, 2, 3, 3, 3, 0, 1, 0, 3], "marginThreshold": 1.5};
+</script>
+<script>
+// Sound-Out Speller v1 — core logic (JS port of features.py + predict_v1.py).
+// Pure functions; expects a global MODEL = {coef, intercept, vocab, levelIdx, marginThreshold}.
+// This exact file is inlined into demo/index.html by build_demo.py and is also
+// exercised directly under node by parity_test.js.
+
+function soundForm(w) {
+  let s = String(w).toLowerCase();
+  s = s.replace(/igh/g, "i");
+  s = s.replace(/^kn/, "n");
+  s = s.replace(/^wr/, "r");
+  s = s.replace(/^gn/, "n");
+  s = s.replace(/^wh/, "w");
+  s = s.replace(/ph/g, "f");
+  s = s.replace(/ck/g, "k");
+  s = s.replace(/th/g, "t");
+  s = s.replace(/ea/g, "e").replace(/ee/g, "e");
+  s = s.replace(/ai/g, "a").replace(/ay/g, "a");
+  s = s.replace(/oa/g, "o").replace(/ow/g, "o").replace(/oe/g, "o");
+  s = s.replace(/ie/g, "i");
+  s = s.replace(/ue/g, "u").replace(/ui/g, "u");
+  s = s.replace(/ur/g, "er").replace(/ir/g, "er");
+  s = s.replace(/c(?=[eiy])/g, "s");
+  s = s.replace(/c/g, "k");
+  s = s.replace(/g(?=[eiy])/g, "j");
+  s = s.replace(/y$/, "i");
+  if (s.length > 3 && s.endsWith("e") && !"aeiou".includes(s[s.length - 2])) {
+    s = s.slice(0, -1);
+  }
+  s = s.replace(/(.)\1+/g, "$1");
+  return s;
+}
+
+function lev(a, b) {
+  if (a === b) return 0;
+  if (!a) return b.length;
+  if (!b) return a.length;
+  let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    for (let j = 1; j <= b.length; j++) {
+      cur.push(Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] !== b[j - 1] ? 1 : 0)));
+    }
+    prev = cur;
+  }
+  return prev[b.length];
+}
+
+function ngramSet(s, n) {
+  const s2 = "^" + s + "$";
+  const out = new Set();
+  if (s2.length < n) { out.add(s2); return out; }
+  for (let i = 0; i <= s2.length - n; i++) out.add(s2.slice(i, i + n));
+  return out;
+}
+
+function dice(a, b, n) {
+  const A = ngramSet(a, n), B = ngramSet(b, n);
+  if (!A.size || !B.size) return 0;
+  let inter = 0;
+  for (const g of A) if (B.has(g)) inter++;
+  return (2 * inter) / (A.size + B.size);
+}
+
+function skeleton(w, keepVowels) {
+  let out = "";
+  for (const ch of w) {
+    const isV = "aeiou".includes(ch);
+    if (isV === keepVowels) out += ch;
+  }
+  return out;
+}
+
+function commonPrefix(a, b) {
+  let n = 0;
+  while (n < a.length && n < b.length && a[n] === b[n]) n++;
+  return n;
+}
+
+function commonSuffix(a, b) {
+  let n = 0;
+  while (n < a.length && n < b.length && a[a.length - 1 - n] === b[b.length - 1 - n]) n++;
+  return n;
+}
+
+function pairFeatures(attempt, cand, candLevelIdx) {
+  const a = String(attempt).toLowerCase(), c = String(cand).toLowerCase();
+  const sa = soundForm(a), sc = soundForm(c);
+  const mx = Math.max(a.length, c.length, 1);
+  const ms = Math.max(sa.length, sc.length, 1);
+  const va = skeleton(a, true), vc = skeleton(c, true);
+  const ka = skeleton(a, false), kc = skeleton(c, false);
+  return [
+    lev(a, c) / mx,
+    lev(sa, sc) / ms,
+    sa === sc ? 1 : 0,
+    dice(a, c, 2),
+    dice(a, c, 3),
+    dice(sa, sc, 2),
+    lev(va, vc) / Math.max(va.length, vc.length, 1),
+    lev(ka, kc) / Math.max(ka.length, kc.length, 1),
+    a[0] === c[0] ? 1 : 0,
+    a[a.length - 1] === c[c.length - 1] ? 1 : 0,
+    commonPrefix(a, c) / mx,
+    commonSuffix(a, c) / mx,
+    Math.abs(a.length - c.length) / mx,
+    a === c ? 1 : 0,
+    sa[0] === sc[0] ? 1 : 0,
+    1 - candLevelIdx / 5,
+  ];
+}
+
+// Rank the full vocabulary (MODEL.vocab + any extra custom words) for an attempt.
+// Returns {ranked: [{word, score}], exact, margin, top}.
+function suggest(attempt, extraWords) {
+  const a = String(attempt).toLowerCase().trim();
+  const vocab = MODEL.vocab.slice();
+  const levels = MODEL.levelIdx.slice();
+  if (extraWords) {
+    for (const w of extraWords) {
+      if (!vocab.includes(w)) { vocab.push(w); levels.push(2); }
+    }
+  }
+  const scored = vocab.map((c, i) => {
+    const f = pairFeatures(a, c, levels[i]);
+    let s = MODEL.intercept;
+    for (let j = 0; j < f.length; j++) s += f[j] * MODEL.coef[j];
+    return { word: c, score: s };
+  });
+  scored.sort((x, y) => y.score - x.score);
+  const exact = vocab.includes(a);
+  let margin;
+  if (exact) {
+    const mine = scored.find((r) => r.word === a);
+    const rest = scored.filter((r) => r.word !== a);
+    margin = mine.score - rest[0].score;
+    const ranked = [mine].concat(rest);
+    return { ranked, exact, margin, top: a };
+  }
+  margin = scored[0].score - scored[1].score;
+  return { ranked: scored, exact, margin, top: scored[0].word };
+}
+
+// Confidence rule calibrated in calibrate_threshold2.py:
+// accept a suggestion if the top candidate sounds identical (sound distance 0),
+// is one edit away, or the model's margin clears the calibrated threshold.
+function isAccepted(attempt, result) {
+  if (result.exact) return true;
+  const a = String(attempt).toLowerCase().trim();
+  const top = result.top;
+  if (lev(soundForm(a), soundForm(top)) === 0) return true;
+  if (lev(a, top) <= 1) return true;
+  return result.margin >= MODEL.marginThreshold;
+}
+
+// Deterministic phonics hint for (attempt, target): first matching pattern wins.
+function hintFor(attempt, target) {
+  const a = String(attempt).toLowerCase(), t = String(target).toLowerCase();
+  if (a === t) return "";
+  if (t.length > 3 && t.endsWith("e") && a === t.slice(0, -1))
+    return "This word ends with a silent e: " + t + ".";
+  if (t.startsWith("wh") && a.startsWith("w") && !a.startsWith("wh"))
+    return "This word starts with wh: " + t + ".";
+  const dbl = t.match(/(.)\1/);
+  if (dbl && a === t.replace(dbl[0], dbl[1]))
+    return "This word has a double letter: " + dbl[0] + " in " + t + ".";
+  if (t.includes("th") && (a.includes("t") || a.includes("d")) && lev(a, t) <= 2)
+    return "This word has th in it: " + t + ". Tongue between your teeth!";
+  if (t.includes("ck") && a.replace(/k$/, "c") === t || (t.includes("ck") && a.includes("k") && !a.includes("ck") && lev(a, t) <= 2))
+    return "That k sound is spelled ck here: " + t + ".";
+  if (t.endsWith("y") && a.endsWith("i") && a.slice(0, -1) === t.slice(0, -1))
+    return "This word ends with y: " + t + ".";
+  if (soundForm(a) === soundForm(t))
+    return "You heard every sound! This word just spells them a tricky way: " + t + ".";
+  if (a.length === t.length && lev(a, t) === 2) {
+    const sa = a.split("").sort().join(""), st = t.split("").sort().join("");
+    if (sa === st) return "All the letters are there — two of them swapped places.";
+  }
+  if (lev(a, t) === 1 && a.length < t.length)
+    return "You are one letter away — a letter is missing.";
+  if (lev(a, t) === 1 && a.length > t.length)
+    return "You are one letter away — one extra letter snuck in.";
+  if (lev(a, t) === 1)
+    return "You are one letter away — check each letter against " + t + ".";
+  return "You heard the sounds — look closely at the middle of " + t + ".";
+}
+
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = { soundForm, lev, pairFeatures, suggest, isAccepted, hintFor };
+}
+
+</script>
+<script>
+(function(){
+  const LEVELS = [["all","All words"],["pre_primer","Pre-K"],["primer","Kindergarten"],["first","Grade 1"],["second","Grade 2"],["third","Grade 3"],["nouns","Nouns"],["custom","My words"]];
+  const LEVEL_WORDS = {"first": ["after", "again", "an", "any", "as", "ask", "by", "could", "every", "fly", "from", "give", "going", "had", "has", "her", "him", "his", "how", "just", "know", "let", "live", "may", "of", "old", "once", "open", "over", "put", "round", "some", "stop", "take", "thank", "them", "then", "think", "walk", "were", "when"], "nouns": ["apple", "baby", "back", "ball", "bear", "bed", "bell", "bird", "birthday", "boat", "box", "boy", "bread", "brother", "cake", "car", "cat", "chair", "chicken", "children", "christmas", "coat", "corn", "cow", "day", "dog", "doll", "door", "duck", "egg", "eye", "farm", "farmer", "father", "feet", "fire", "fish", "floor", "flower", "game", "garden", "girl", "goodbye", "grass", "ground", "hand", "head", "hill", "home", "horse", "house", "kitty", "leg", "letter", "man", "men", "milk", "money", "morning", "mother", "name", "nest", "night", "paper", "party", "picture", "pig", "rabbit", "rain", "ring", "robin", "school", "seed", "sheep", "shoe", "sister", "snow", "song", "squirrel", "stick", "street", "sun", "table", "thing", "time", "top", "toy", "tree", "watch", "water", "way", "wind", "window", "wood"], "pre_primer": ["a", "and", "away", "big", "blue", "can", "come", "down", "find", "for", "funny", "go", "help", "here", "i", "in", "is", "it", "jump", "little", "look", "make", "me", "my", "not", "one", "play", "red", "run", "said", "see", "the", "three", "to", "two", "up", "we", "where", "yellow", "you"], "primer": ["all", "am", "are", "at", "ate", "be", "black", "brown", "but", "came", "did", "do", "eat", "four", "get", "good", "have", "he", "into", "like", "must", "new", "no", "now", "on", "our", "out", "please", "pretty", "ran", "ride", "saw", "say", "she", "so", "soon", "that", "there", "they", "this", "too", "under", "want", "was", "well", "went", "what", "white", "who", "will", "with", "yes"], "second": ["always", "around", "because", "been", "before", "best", "both", "buy", "call", "cold", "does", "dont", "fast", "first", "five", "found", "gave", "goes", "green", "its", "made", "many", "off", "or", "pull", "read", "right", "sing", "sit", "sleep", "tell", "their", "these", "those", "upon", "us", "use", "very", "wash", "which", "why", "wish", "work", "would", "write", "your"], "third": ["about", "better", "bring", "carry", "clean", "cut", "done", "draw", "drink", "eight", "fall", "far", "full", "got", "grow", "hold", "hot", "hurt", "if", "keep", "kind", "laugh", "light", "long", "much", "myself", "never", "only", "own", "pick", "seven", "shall", "show", "six", "small", "start", "ten", "today", "together", "try", "warm"]};
+  let mode = "practice";
+  let level = "all";
+  let target = null;
+  let custom = [];
+  try { custom = JSON.parse(localStorage.getItem("sos_custom") || "[]"); } catch(e) { custom = []; }
+  const $ = (id) => document.getElementById(id);
+  const result = $("result");
+
+  function pool(){
+    if (level === "custom") return custom.slice();
+    if (level === "all") return MODEL.vocab.slice();
+    return (LEVEL_WORDS[level] || []).slice();
+  }
+  function extraWords(){ return custom.filter(w => !MODEL.vocab.includes(w)); }
+
+  function showResult(kind, html){
+    result.className = "result show " + kind;
+    result.innerHTML = html;
+    try { result.scrollIntoView({behavior:"smooth", block:"nearest"}); } catch(e) {}
+  }
+  function pickWord(){
+    const p = pool();
+    if (!p.length) { target = null; showResult("hmm", "No words in this list yet — add some under “For parents” below."); return; }
+    target = p[Math.floor(Math.random() * p.length)];
+    $("attempt").value = "";
+    result.className = "result"; result.innerHTML = "";
+    speak();
+  }
+  function speak(){
+    if (!target) return;
+    try {
+      const u = new SpeechSynthesisUtterance(target);
+      u.rate = 0.85;
+      speechSynthesis.cancel(); speechSynthesis.speak(u);
+    } catch(e) {}
+  }
+  function checkPractice(preset){
+    const att = (preset !== undefined ? preset : $("attempt").value).toLowerCase().trim();
+    if (!att || !target) return;
+    if (att === target) {
+      showResult("good", "⭐ <span class='big'>You got it!</span><br>“" + target + "” — spelled just right.");
+      return;
+    }
+    const hint = hintFor(att, target);
+    showResult("close", "So close! You wrote <b>" + att + "</b>.<br>The word is <span class='big'>" + target + "</span>.<br>" + hint);
+  }
+  function checkFree(preset){
+    const att = (preset !== undefined ? preset : $("freeAttempt").value).toLowerCase().trim();
+    if (!att) return;
+    const r = suggest(att, extraWords());
+    if (r.exact) {
+      showResult("good", "⭐ <span class='big'>" + att + "</span> — that's spelled right!");
+      return;
+    }
+    const others = r.ranked.slice(1, 4).map(x => x.word).join(", ");
+    if (isAccepted(att, r)) {
+      const hint = hintFor(att, r.top);
+      showResult("close", "Did you mean <span class='big'>" + r.top + "</span>?<br>" + hint +
+        "<div class='guesses'>Other guesses: <b>" + others + "</b></div>");
+    } else {
+      const close = r.ranked.slice(0, 3).map(x => x.word).join(", ");
+      showResult("hmm", "That word isn't in this level's word list yet.<br>" +
+        "<div class='guesses'>Closest words I know: <b>" + close + "</b></div>");
+    }
+  }
+  function setMode(m){
+    mode = m;
+    $("modePractice").classList.toggle("on", m === "practice");
+    $("modeCheck").classList.toggle("on", m === "check");
+    $("practiceBox").style.display = m === "practice" ? "" : "none";
+    $("checkBox").style.display = m === "check" ? "" : "none";
+    result.className = "result"; result.innerHTML = "";
+  }
+  // level chips
+  const chips = $("levelChips");
+  for (const [key, label] of LEVELS) {
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = label; b.dataset.level = key;
+    if (key === "all") b.classList.add("on");
+    b.onclick = () => {
+      level = key;
+      chips.querySelectorAll("button").forEach(x => x.classList.toggle("on", x.dataset.level === key));
+      pickWord();
+    };
+    chips.appendChild(b);
+  }
+  $("modePractice").onclick = () => setMode("practice");
+  $("modeCheck").onclick = () => setMode("check");
+  $("hearBtn").onclick = speak;
+  $("checkBtn").onclick = () => checkPractice();
+  $("nextBtn").onclick = pickWord;
+  $("freeCheckBtn").onclick = () => checkFree();
+  $("attempt").addEventListener("keydown", e => { if (e.key === "Enter") checkPractice(); });
+  $("freeAttempt").addEventListener("keydown", e => { if (e.key === "Enter") checkFree(); });
+  $("customWords").value = custom.join(" ");
+  $("saveWords").onclick = () => {
+    custom = $("customWords").value.toLowerCase().split(/[\s,]+/).filter(w => /^[a-z']+$/.test(w));
+    try { localStorage.setItem("sos_custom", JSON.stringify(custom)); } catch(e) {}
+    $("savedNote").textContent = " Saved " + custom.length + " word(s).";
+  };
+  // QA / shareable states via URL params: ?mode=check&attempt=sed&auto=1, ?word=said&attempt=sed&auto=1
+  const q = new URLSearchParams(location.search);
+  if (q.get("mode") === "check") setMode("check");
+  if (q.get("word")) { target = q.get("word"); }
+  if (q.get("auto") === "1") {
+    const att = q.get("attempt") || "";
+    if (mode === "check") { $("freeAttempt").value = att; checkFree(att); }
+    else { $("attempt").value = att; checkPractice(att); }
+  } else if (!q.get("word")) {
+    pickWord();
+  }
+})();
+</script>
+</body>
+</html>

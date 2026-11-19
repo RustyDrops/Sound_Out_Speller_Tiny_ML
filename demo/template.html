@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sound-Out Speller — tiny ML demo</title>
+<style>
+  :root{
+    --bg:#fdf6ec; --card:#ffffff; --ink:#2d2a26; --muted:#7a7267;
+    --accent:#e86a4e; --accent-ink:#ffffff; --good:#2e9e63; --soft:#fdeeda;
+    --chip:#f3e9d7; --border:#e7dcc8;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#1d1a16; --card:#2a251f; --ink:#f3ead9; --muted:#b3a893;
+      --accent:#f0836a; --accent-ink:#241611; --good:#5fce8f; --soft:#3a2f22;
+      --chip:#3a332a; --border:#4a4136; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:ui-rounded,"Comic Sans MS",system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+  .wrap{max-width:520px;margin:0 auto;padding:18px 16px 30px}
+  h1{font-size:30px;margin:6px 0 2px;text-align:center}
+  .tag{text-align:center;color:var(--muted);margin:0 0 16px;font-size:15px}
+  .modes{display:flex;gap:8px;margin-bottom:12px}
+  .modes button{flex:1;padding:12px;border-radius:14px;border:2px solid var(--border);background:var(--card);color:var(--ink);font-size:16px;font-weight:700;cursor:pointer}
+  .modes button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+  .card{background:var(--card);border:2px solid var(--border);border-radius:20px;padding:18px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+  .chips button{padding:7px 11px;border-radius:999px;border:2px solid var(--border);background:var(--chip);color:var(--ink);font-size:13px;font-weight:700;cursor:pointer}
+  .chips button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+  .hear{width:100%;padding:16px;border:none;border-radius:16px;background:var(--soft);color:var(--ink);font-size:19px;font-weight:800;cursor:pointer;margin-bottom:12px}
+  label{display:block;font-size:14px;color:var(--muted);margin:2px 0 6px}
+  input[type=text]{width:100%;padding:14px;font-size:22px;border-radius:14px;border:2px solid var(--border);background:var(--bg);color:var(--ink);text-align:center;letter-spacing:1px}
+  .go{width:100%;padding:15px;margin-top:12px;border:none;border-radius:16px;background:var(--accent);color:var(--accent-ink);font-size:19px;font-weight:800;cursor:pointer}
+  .next{width:100%;padding:12px;margin-top:10px;border:2px solid var(--border);border-radius:16px;background:var(--card);color:var(--ink);font-size:16px;font-weight:700;cursor:pointer}
+  .result{margin-top:16px;border-radius:16px;padding:14px;font-size:17px;line-height:1.45;display:none}
+  .result.show{display:block}
+  .result.good{background:#e5f6ec;color:#14532d}
+  .result.close{background:var(--soft);color:var(--ink)}
+  .result.hmm{background:var(--chip);color:var(--ink)}
+  @media (prefers-color-scheme: dark){ .result.good{background:#173b28;color:#b9f4cf} }
+  .result .big{font-size:24px;font-weight:800}
+  .guesses{margin-top:8px;font-size:15px;color:var(--muted)}
+  .guesses b{color:var(--ink)}
+  details{margin-top:16px;background:var(--card);border:2px solid var(--border);border-radius:16px;padding:12px 14px}
+  details summary{font-weight:700;cursor:pointer}
+  details textarea{width:100%;margin-top:10px;padding:10px;border-radius:10px;border:2px solid var(--border);background:var(--bg);color:var(--ink);font-size:15px;min-height:64px}
+  details button{margin-top:8px;padding:10px 14px;border:none;border-radius:10px;background:var(--accent);color:var(--accent-ink);font-weight:700;cursor:pointer}
+  .foot{margin-top:18px;font-size:12.5px;color:var(--muted);line-height:1.5}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🔤 Sound-Out Speller</h1>
+  <p class="tag">Hear it. Sound it out. Spell it.</p>
+
+  <div class="modes">
+    <button id="modePractice" class="on" type="button">🎯 Practice</button>
+    <button id="modeCheck" type="button">✏️ Check my spelling</button>
+  </div>
+
+  <div class="card">
+    <div id="practiceBox">
+      <div class="chips" id="levelChips"></div>
+      <button class="hear" id="hearBtn" type="button">🔊 Hear the word</button>
+      <label for="attempt">Type the word you hear</label>
+      <input type="text" id="attempt" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="type here">
+      <button class="go" id="checkBtn" type="button">Check it!</button>
+      <button class="next" id="nextBtn" type="button">Next word ➡️</button>
+    </div>
+    <div id="checkBox" style="display:none">
+      <label for="freeAttempt">Type a word the way it sounds</label>
+      <input type="text" id="freeAttempt" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="like: sed, wos, becos">
+      <button class="go" id="freeCheckBtn" type="button">Check it!</button>
+    </div>
+    <div class="result" id="result"></div>
+  </div>
+
+  <details>
+    <summary>👨‍👩‍👧 For parents: this week's words</summary>
+    <p style="font-size:14px;color:var(--muted)">Type your child's spelling words (separated by spaces or commas). They join the word list for checking, and Practice can use just your list. Saved only on this device.</p>
+    <textarea id="customWords" placeholder="said because friend people"></textarea>
+    <button id="saveWords" type="button">Save my list</button>
+    <span id="savedNote" style="font-size:13px;color:var(--muted)"></span>
+  </details>
+
+  <p class="foot">
+    <b>Prototype v1 — honest notes.</b> A tiny model (2.5 KB) trained on the Dolch word list
+    (314 words) with practice misspellings generated by code. On held-out generated spellings it
+    finds the right word first about 87 times in 100, and it never changes a word that is already
+    spelled right. It has not been tested on real children's writing yet.
+    Everything runs on this device — nothing you type is sent anywhere.
+  </p>
+</div>
+
+<script>
+const MODEL = __MODEL_JSON__;
+</script>
+<script>
+__CORE_JS__
+</script>
+<script>
+(function(){
+  const LEVELS = [["all","All words"],["pre_primer","Pre-K"],["primer","Kindergarten"],["first","Grade 1"],["second","Grade 2"],["third","Grade 3"],["nouns","Nouns"],["custom","My words"]];
+  const LEVEL_WORDS = __LEVEL_WORDS__;
+  let mode = "practice";
+  let level = "all";
+  let target = null;
+  let custom = [];
+  try { custom = JSON.parse(localStorage.getItem("sos_custom") || "[]"); } catch(e) { custom = []; }
+  const $ = (id) => document.getElementById(id);
+  const result = $("result");
+
+  function pool(){
+    if (level === "custom") return custom.slice();
+    if (level === "all") return MODEL.vocab.slice();
+    return (LEVEL_WORDS[level] || []).slice();
+  }
+  function extraWords(){ return custom.filter(w => !MODEL.vocab.includes(w)); }
+
+  function showResult(kind, html){
+    result.className = "result show " + kind;
+    result.innerHTML = html;
+    try { result.scrollIntoView({behavior:"smooth", block:"nearest"}); } catch(e) {}
+  }
+  function pickWord(){
+    const p = pool();
+    if (!p.length) { target = null; showResult("hmm", "No words in this list yet — add some under “For parents” below."); return; }
+    target = p[Math.floor(Math.random() * p.length)];
+    $("attempt").value = "";
+    result.className = "result"; result.innerHTML = "";
+    speak();
+  }
+  function speak(){
+    if (!target) return;
+    try {
+      const u = new SpeechSynthesisUtterance(target);
+      u.rate = 0.85;
+      speechSynthesis.cancel(); speechSynthesis.speak(u);
+    } catch(e) {}
+  }
+  function checkPractice(preset){
+    const att = (preset !== undefined ? preset : $("attempt").value).toLowerCase().trim();
+    if (!att || !target) return;
+    if (att === target) {
+      showResult("good", "⭐ <span class='big'>You got it!</span><br>“" + target + "” — spelled just right.");
+      return;
+    }
+    const hint = hintFor(att, target);
+    showResult("close", "So close! You wrote <b>" + att + "</b>.<br>The word is <span class='big'>" + target + "</span>.<br>" + hint);
+  }
+  function checkFree(preset){
+    const att = (preset !== undefined ? preset : $("freeAttempt").value).toLowerCase().trim();
+    if (!att) return;
+    const r = suggest(att, extraWords());
+    if (r.exact) {
+      showResult("good", "⭐ <span class='big'>" + att + "</span> — that's spelled right!");
+      return;
+    }
+    const others = r.ranked.slice(1, 4).map(x => x.word).join(", ");
+    if (isAccepted(att, r)) {
+      const hint = hintFor(att, r.top);
+      showResult("close", "Did you mean <span class='big'>" + r.top + "</span>?<br>" + hint +
+        "<div class='guesses'>Other guesses: <b>" + others + "</b></div>");
+    } else {
+      const close = r.ranked.slice(0, 3).map(x => x.word).join(", ");
+      showResult("hmm", "That word isn't in this level's word list yet.<br>" +
+        "<div class='guesses'>Closest words I know: <b>" + close + "</b></div>");
+    }
+  }
+  function setMode(m){
+    mode = m;
+    $("modePractice").classList.toggle("on", m === "practice");
+    $("modeCheck").classList.toggle("on", m === "check");
+    $("practiceBox").style.display = m === "practice" ? "" : "none";
+    $("checkBox").style.display = m === "check" ? "" : "none";
+    result.className = "result"; result.innerHTML = "";
+  }
+  // level chips
+  const chips = $("levelChips");
+  for (const [key, label] of LEVELS) {
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = label; b.dataset.level = key;
+    if (key === "all") b.classList.add("on");
+    b.onclick = () => {
+      level = key;
+      chips.querySelectorAll("button").forEach(x => x.classList.toggle("on", x.dataset.level === key));
+      pickWord();
+    };
+    chips.appendChild(b);
+  }
+  $("modePractice").onclick = () => setMode("practice");
+  $("modeCheck").onclick = () => setMode("check");
+  $("hearBtn").onclick = speak;
+  $("checkBtn").onclick = () => checkPractice();
+  $("nextBtn").onclick = pickWord;
+  $("freeCheckBtn").onclick = () => checkFree();
+  $("attempt").addEventListener("keydown", e => { if (e.key === "Enter") checkPractice(); });
+  $("freeAttempt").addEventListener("keydown", e => { if (e.key === "Enter") checkFree(); });
+  $("customWords").value = custom.join(" ");
+  $("saveWords").onclick = () => {
+    custom = $("customWords").value.toLowerCase().split(/[\s,]+/).filter(w => /^[a-z']+$/.test(w));
+    try { localStorage.setItem("sos_custom", JSON.stringify(custom)); } catch(e) {}
+    $("savedNote").textContent = " Saved " + custom.length + " word(s).";
+  };
+  // QA / shareable states via URL params: ?mode=check&attempt=sed&auto=1, ?word=said&attempt=sed&auto=1
+  const q = new URLSearchParams(location.search);
+  if (q.get("mode") === "check") setMode("check");
+  if (q.get("word")) { target = q.get("word"); }
+  if (q.get("auto") === "1") {
+    const att = q.get("attempt") || "";
+    if (mode === "check") { $("freeAttempt").value = att; checkFree(att); }
+    else { $("attempt").value = att; checkPractice(att); }
+  } else if (!q.get("word")) {
+    pickWord();
+  }
+})();
+</script>
+</body>
+</html>
