@@ -64,6 +64,24 @@ judged on a fresh exam.
   riting→ring (write missed), jumpt→jump, fone→done (phone not in vocab — no correct
   answer exists; v1 has no low-confidence "not in this level's words" threshold yet).
 
+## Demo + release (2026-11-18, at Rusty's direction)
+- Browser demo `demo/index.html`: one self-contained file (model JSON + JS port of
+  features.py inlined by `build_demo.py`; loads nothing from the network). JS/Python
+  parity verified with `parity_test.js`: 30/30 attempts identical (top-5, exact flag,
+  margin, accepted). Rendered states screenshot-checked at 390×844 and 360×740.
+- Confidence rule: the raw logistic probability failed as a confidence signal
+  (validation accepted-precision plateaued at 0.92), so the demo's "not in this
+  level's words yet" state uses the deterministic rule calibrated in
+  `calibrate_threshold2.py` (sound distance 0, or edit distance ≤1, or margin ≥1.5):
+  accepts 94.9% of in-vocab validation attempts, rejects 80.5% of programmatic
+  out-of-vocab attempts. Full record in `threshold_v1.json`.
+- GitHub: published PUBLIC at Rusty's instruction ("push to github", following the
+  Scam Shield / Write It Right pattern) —
+  https://github.com/RustyDrops/Sound_Out_Speller_Tiny_ML, v1 commit b8792cf2,
+  verified by read-back (metrics and binary model SHA-checked via the connector).
+  The repo's social-preview image is a manual Settings upload (promo card is in
+  `promo/`); a push cannot set it.
+
 ## Known limitations
 See SPEC.md "Honest limits": no -ed pattern words in Dolch, homophones need context,
 generated errors approximate — but do not prove performance on — real children's spelling.
