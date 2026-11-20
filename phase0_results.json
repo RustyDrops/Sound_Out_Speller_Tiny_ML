@@ -1,0 +1,167 @@
+{
+  "split_sizes": {
+    "train": 994,
+    "val": 228,
+    "test": 134
+  },
+  "val_v2_product_top1": 0.8333333333333334,
+  "val_rank_buckets_v2": {
+    "rank1": 190,
+    "rank2": 29,
+    "rank6-10": 2,
+    "rank4-5": 5,
+    "rank3": 1,
+    "rank>10": 1
+  },
+  "headroom_per_family": {
+    "th_fv": {
+      "n_val": 5,
+      "errors": 4,
+      "top1": 0.19999999999999996,
+      "err_rank_buckets": {
+        "rank1": 1,
+        "rank6-10": 2,
+        "rank4-5": 1,
+        "rank2": 1
+      },
+      "errors_with_correct_in_top3": 1,
+      "oracle_gain_pts_if_all_top3_errors_fixed": 0.44
+    },
+    "cluster_reduce": {
+      "n_val": 4,
+      "errors": 3,
+      "top1": 0.25,
+      "err_rank_buckets": {
+        "rank2": 3,
+        "rank1": 1
+      },
+      "errors_with_correct_in_top3": 3,
+      "oracle_gain_pts_if_all_top3_errors_fixed": 1.32
+    },
+    "th_td": {
+      "n_val": 3,
+      "errors": 0,
+      "top1": 1.0,
+      "err_rank_buckets": {
+        "rank1": 3
+      },
+      "errors_with_correct_in_top3": 0,
+      "oracle_gain_pts_if_all_top3_errors_fixed": 0.0
+    },
+    "generic_drop": {
+      "n_val": 15,
+      "errors": 7,
+      "top1": 0.5333333333333333,
+      "err_rank_buckets": {
+        "rank1": 8,
+        "rank2": 5,
+        "rank4-5": 2
+      },
+      "errors_with_correct_in_top3": 5,
+      "oracle_gain_pts_if_all_top3_errors_fixed": 2.19
+    }
+  },
+  "letter_name_val_n": 0,
+  "specialist_th_trigger_val": {
+    "triggered": 30,
+    "triggered_correct_breakable": 26,
+    "triggered_errors_addressable_top3": 2,
+    "oracle_gain_pts_overall_val": 0.88,
+    "breakable_to_addressable": 13.0
+  },
+  "specialist_cluster_trigger_val": {
+    "triggered": 15,
+    "triggered_correct_breakable": 11,
+    "triggered_errors_addressable_top3": 3,
+    "oracle_gain_pts_overall_val": 1.32,
+    "breakable_to_addressable": 3.67
+  },
+  "view_solo_probes_val": {
+    "phonetic_view": {
+      "features": [
+        "sound_lev_norm",
+        "sound_equal",
+        "sound_bigram_dice",
+        "sound_first_equal"
+      ],
+      "val_top1": 0.6623,
+      "val_top3": 0.8289
+    },
+    "grapheme_edit_view": {
+      "features": [
+        "lev_norm",
+        "bigram_dice",
+        "trigram_dice"
+      ],
+      "val_top1": 0.7193,
+      "val_top3": 0.9211
+    },
+    "skeleton_view": {
+      "features": [
+        "vowel_skel_lev",
+        "cons_skel_lev"
+      ],
+      "val_top1": 0.75,
+      "val_top3": 0.8947
+    },
+    "edge_shape_view": {
+      "features": [
+        "same_first",
+        "same_last",
+        "prefix_ratio",
+        "suffix_ratio",
+        "len_diff_ratio"
+      ],
+      "val_top1": 0.7456,
+      "val_top3": 0.9342
+    },
+    "identity_prior_view": {
+      "features": [
+        "identity",
+        "level_prior"
+      ],
+      "val_top1": 0.0044,
+      "val_top3": 0.0132
+    },
+    "ALL_features_control": {
+      "features": [
+        "lev_norm",
+        "sound_lev_norm",
+        "sound_equal",
+        "bigram_dice",
+        "trigram_dice",
+        "sound_bigram_dice",
+        "vowel_skel_lev",
+        "cons_skel_lev",
+        "same_first",
+        "same_last",
+        "prefix_ratio",
+        "suffix_ratio",
+        "len_diff_ratio",
+        "identity",
+        "sound_first_equal",
+        "level_prior"
+      ],
+      "val_top1": 0.8333,
+      "val_top3": 0.9649
+    }
+  },
+  "letter_name_parse": {
+    "canonical_attempts": {
+      "r": "are",
+      "y": "why",
+      "u": "you",
+      "c": "see",
+      "i": "eye",
+      "b": "be",
+      "o": "oh"
+    },
+    "parse_cleanly": 7,
+    "n": 7,
+    "fraction": 1.0,
+    "attempts_that_are_vocab_words_themselves": {
+      "i": "eye"
+    },
+    "note": "Attempts colliding with a vocab word (e.g. 'i') are claimed by the product exact-match rule before any specialist could run \u2014 by design."
+  }
+}

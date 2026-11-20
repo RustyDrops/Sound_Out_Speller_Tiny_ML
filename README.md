@@ -49,6 +49,56 @@ Live examples from the shipped runtime: `wos → was` ✓, `teh → the` ✓,
 `becos → because` ✓, `sed → seed` (with *said* #2 — the classic hard one),
 `riting → ring` ✗.
 
+## Phase 1 view probe — DEVELOPMENT (validation only, not a release)
+
+> **Development update only — not a new version and not a keeper.** v1 remains
+> the keeper and the shipped model. No v3 has been trained. Everything below
+> was measured on the v2 **validation split only** (n=228); the fresh generated
+> exam and the CHES real exam were not opened for this probe.
+
+This probe tested new "views" of a spelling attempt (feature groups added on
+top of the frozen v1/v2 features; `features.py` unchanged, new code in
+`features_phase1.py`):
+
+| Configuration (validation top-1) | Score |
+|---|---|
+| Control — all 16 existing features (= v2 ranker) | 0.8333 |
+| Combined new views (47 features) | **0.9342** |
+| Family-posterior view (V5) solo | 0.9167 |
+
+- Combined views: **0.9342 vs control 0.8333 — +10.09 points**, clearing the
+  plan's pre-registered +2.0-point bar for proceeding to a v3 pre-registration.
+  Combined top-3 was 0.9956.
+- The family-posterior view (V5 — "which known error family best explains
+  this attempt?") was the strongest single view, scoring 0.9167 solo.
+- th_fv validation top-1 moved **0.20 → 0.80** (small-n caveat: th_fv n=5 on
+  validation, so this is 1/5 → 4/5 — directionally strong, not precise).
+- **S2 letter-name lookup:** deterministic, ~0 bytes. There are 6 real
+  letter-name pairs in the vocabulary; 5 are reachable by S2 (r→are, y→why,
+  u→you, c→see, b→be). Correction to the earlier count: 'oh' is **not** in the
+  Dolch-314 vocabulary, so o→oh can never exist; i→eye is excluded by design
+  because the attempt "i" is itself a vocabulary word claimed by the
+  exact-match rule. S2 triggered on 0 of 228 validation attempts (the family
+  is held out by design), so no validation gain is claimed for it; a component
+  smoke check confirms it ranks all 5 reachable targets first.
+- **Generator-consistency caveat for V5:** the family-posterior features ask
+  whether a candidate could have generated the attempt under a known error
+  family, and the validation attempts were produced by those same generator
+  families. Part of V5's win may therefore be generator-consistency signal.
+  Transfer to real children's errors will be judged on a fresh generated exam
+  and on CHES — not on this validation split.
+- False-correction invariant holds: combined product ranker ranks every
+  correctly spelled vocabulary word #1 for itself, **1.0000 (314/314)**, with
+  and without S2.
+- **Keeper gate (standing):** a v3 **cannot be declared keeper until the CHES
+  real exam is scored** — the same gate that keeps v2 from being keeper
+  (CHES ≥ v1 and ≥ B0 + 0.05 on CHES∩Dolch-314). Validation results alone,
+  however strong, do not change that.
+
+Full plan and results: `PLAN-VIEWS-SPECIALISTS.md`, `phase0_results.json`,
+`phase1_results.json`. Probe code: `features_phase1.py`, `phase1_probe.py`,
+`phase0_diag.py`.
+
 ## Honest limits
 
 - Test spellings are **generated**, not real children's writing. These numbers prove
