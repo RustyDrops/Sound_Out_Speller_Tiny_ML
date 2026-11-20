@@ -743,3 +743,66 @@ Built by build_vocab_c1b.py; audit: autonomous/c1b-vocab-audit.json.
 - CHES gate: RETIRED (Rusty, 2026-11-19) — cited as retired, never passed. Disclosure stands: generated-exam only, never scored on real children's misspellings.
 - Attribution: "Vocabulary includes words from the New General Service List / New Dolch List by Browne & Culligan, licensed CC BY-SA 4.0."
 - Terms safety: no frontier-model output in data, labels, filtering, or selection; family weights = v3 weights reused unchanged; Birkbeck file eval-only and never shipped.
+
+## Release note — C1b pushed as DEFAULT model (2026-11-20)
+
+Executed under the C1b pre-registration above and Rusty's standing rule
+(passes all frozen gates + improves → GitHub default; older models kept).
+
+- Repo: https://github.com/RustyDrops/Sound_Out_Speller_Tiny_ML (public), branch `main`
+- Commit: `3d75ca76adec65263375886cbf07263183782449` — "Speller C1b becomes default model (0.9434 fresh generated exam over frozen 1,000-word vocab; all frozen gates pass; CHES gate retired by owner decision 2026-11-19, generated-exam-only disclosure in README; NGSL/New Dolch CC BY-SA 4.0 attribution in README)" (14 files, staged snapshot in `release_c1b/`, parent = v3 default commit `ca63c7ed`)
+- Verification (read-back via GitHub API): newest commit on `main` matches `3d75ca76…`; git blob SHAs match local exactly for all 14 pushed files, including model_c1b.npz; pre-existing v1/v3 files confirmed still in tree (49 files total).
+- Full verdict: autonomous/c1b-VERDICT.md.
+
+---
+
+# C2-AFFR — affrication enters the training family mix (2026-11-20)
+
+Pre-registration: `autonomous/c2-affr/PREREGISTRATION.md` (frozen before
+any C2 training). Verdict: `autonomous/c2-affr/VERDICT.md`.
+
+## The one lever
+Training-generator family mix ONLY: affrication (tr→chr, dr→jr) is no
+longer held out — it enters training under the standard non-held-out
+single-variant rule at the pre-registered 50% rate (exam-seed coin flip
+per eligible word; 28 eligible words, 1 deterministic variant each; the
+flip sent 18 variants to the fresh exam and 10 to the training pool, all
+10 surviving weighted sampling). Letter_name remains held out.
+UNCHANGED from C1b: frozen 1,000-word vocab, recipe (LR C=4.0 balanced,
+hard-confuser + sampled negatives, identity-half), 47 features, S2,
+v3 family weights reused verbatim. Seeds: train 20261301, exam 103101.
+Exam construction: pair-disjoint from the C2 train pool for all
+families; non-affrication pairs also disjoint from all prior pools
+incl. C1b's spent exam; affrication pairs exempt from prior-*exam*
+exclusion only (the 28-pair space was fully consumed by prior exams
+while held out of all prior training — registered before training).
+
+## Results (run on Colab CPU, 2026-11-20; finalize in train_c2.py, single run)
+**Verdict: C2-AFFR PASSES all frozen gates and beats C1b — C2 becomes
+the GitHub default, C1b kept for comparison.** Full gate table:
+`autonomous/c2-affr/VERDICT.md`; raw numbers: `metrics_c2.json`.
+
+- Fresh generated exam (seed 103101, n=1,754): **C2 top-1 0.9538**,
+  B0 0.7623, C1b on the same exam 0.9447 (in-sample-flavoured, see
+  preregistration rule 2); Dolch-314 slice 0.9167 (n=72).
+- **Affrication 0.8889 (n=18)** — C1b scored 0.1111 and B0 0.5000 on the
+  same rows; C1b's own exam had affrication at 0.1364 (n=22). Ten
+  training rows closed the gap: an exposure gap, not a feature gap.
+- False-correction: product self-rank 1.0000 (S2 on and off, computed
+  explicitly); raw model 0.9880.
+- Birkbeck-filtered (eval-only, OTA 0643, never shipped, NOT CHES):
+  n=5,499, C2 0.4264 ≥ B0 0.3959.
+- Size: model_c2.npz 6,767 B (≤16 KB gate); demo vocab array 8,958 B.
+- Colab units (estimates, both ways): balance delta 1.69 over the job
+  window (account-wide; two other assignments active — overstates C2's
+  share); rate × elapsed 0.083 (CPU 0.08/hr × ~3,746 s runtime-active).
+  Incident: the first driver was SIGTERM-killed mid-poll;
+  recover_c2.py adopted the orphaned runtime and finished the job —
+  training ran exactly once.
+- CHES gate: RETIRED (Rusty, 2026-11-19) — cited as retired, never
+  passed. Disclosure stands: generated-exam only, never scored on real
+  children's misspellings.
+- Attribution: "Vocabulary includes words from the New General Service List / New Dolch List by Browne & Culligan, licensed CC BY-SA 4.0."
+- Terms safety: no frontier-model output in data, labels, filtering, or
+  selection; family weights = v3 weights reused unchanged; Birkbeck
+  file eval-only and never shipped.

@@ -13,33 +13,38 @@ no internet after the page loads — built for homeschool families and classroom
 a word aloud; Check mode takes any sound-it-out spelling. Parents can paste in this week's
 spelling list and it joins the model's vocabulary on the spot.
 
-## Default model — C1b (keeper)
+## Default model — C2-AFFR (keeper)
 
-**`model_c1b.npz` — 6,767 bytes — is the current default model.** It is the v3
-model with exactly one change: the target vocabulary grows from the 314-word
-Dolch list to a frozen 1,000 words (all 314 Dolch words verbatim + 613 New
-Dolch List 1.1 words in rank order + 73 NGSL 1.2 words in rank order). Same
-recipe, same 47 features, same family weights — a data-only lever,
-pre-registered before training (`c1b-preregistration.md`).
+**`model_c2.npz` — 6,767 bytes — is the current default model.** It is the C1b
+model with exactly one change: the **affrication** error family
+(kids writing *tree* as **chree**, *dress* as **jress** — tr→chr, dr→jr)
+is no longer held out of training. It enters the training generator's
+family mix at a pre-registered 50% rate; vocabulary (frozen 1,000 words),
+recipe, 47 features, and family weights are otherwise identical to C1b.
+Pre-registered before training (`c2-affr-preregistration.md`).
 
-On the fresh generated exam (seed 90210; 2,403 held-out attempts,
-pair-disjoint from every prior training/exam pool; all rankers scored on the
+On the fresh generated exam (seed 103101; 1,754 held-out attempts,
+pair-disjoint from the C2 training pool; all rankers scored on the
 identical exam in one sitting):
 
-| Metric | C1b (default) | Plain edit distance (B0) |
-|---|---|---|
-| Right word ranked #1 | **94.34%** | 77.11% |
-| Right word in top 3 | **99.21%** | 91.09% |
-| Dolch-314 slice, right word #1 | **89.41%** | — |
-| th→f/v family (n=26) | **96.2%** | 69.2% |
-| Cluster-reduction family (n=102) | **82.4%** | 49.0% |
-| Correct spellings changed | **0%** (1,000/1,000 self-rank #1) | 0% |
-| Model size | **6,767 bytes** | — |
+| Metric | C2-AFFR (default) | C1b (same exam) | Plain edit distance (B0) |
+|---|---|---|---|
+| Right word ranked #1 | **95.38%** | 94.47% | 76.23% |
+| Right word in top 3 | **99.89%** | 99.09% | 91.09% |
+| Affrication family (n=18) | **88.9%** | 11.1% | 50.0% |
+| Dolch-314 slice, right word #1 | **91.67%** | — | — |
+| th→f/v family (n=26) | **96.2%** | 96.2% | 57.7% |
+| Cluster-reduction family (n=86) | **80.2%** | 84.9% | 41.9% |
+| Correct spellings changed | **0%** (1,000/1,000 self-rank #1, S2 on and off) | 0% | 0% |
+| Model size | **6,767 bytes** | 6,767 bytes | — |
 
-On a second, eval-only exam — real misspellings from the Birkbeck
-amalgamation filtered to the 1,000 target words (5,499 pairs; eval-only
-under OTA terms, never shipped) — C1b ranks the right word #1 **42.44%**
-of the time vs 39.59% for plain edit distance.
+Affrication was the previous model's weakest family by far (13.6% on
+C1b's own exam); ten training rows — half of the 28 words that can even
+produce the pattern — closed the gap. On a second, eval-only exam —
+real misspellings from the Birkbeck amalgamation filtered to the 1,000
+target words (5,499 pairs; eval-only under OTA terms, never shipped) —
+C2 ranks the right word #1 **42.64%** of the time vs 39.59% for plain
+edit distance.
 
 > **Disclosure — generated-exam only:** The headline numbers are scored on
 > code-generated exams; this model has never been scored on real children's
@@ -53,15 +58,15 @@ of the time vs 39.59% for plain edit distance.
 > Share-alike applies to the vocabulary list as shipped; no other project
 > data is re-licensed by this.
 
-**What the views are:** C1b keeps v3's feature set — the original 16
+**What the views are:** C2 keeps the v3/C1b feature set — the original 16
 spelling/phonetic pair features plus four extra "views" of the same attempt
 (47 features total): an onset–rime view, a th-aware sound form (the sound
 *th* is no longer collapsed to *t*), letter-name features, and a
 developmental family-posterior view — "which known kid-error family
-(silent-e drop, cluster reduction, th→f, …) best explains this attempt as a
-misspelling of this candidate?" A small deterministic letter-name lookup
-(S2: r→are, u→you, c→see…) rides along at ~0 bytes. The full record is in
-`PROVENANCE.md` and `metrics_c1b.json`.
+(silent-e drop, cluster reduction, th→f, affrication, …) best explains
+this attempt as a misspelling of this candidate?" A small deterministic
+letter-name lookup (S2: r→are, u→you, c→see…) rides along at ~0 bytes.
+The full record is in `PROVENANCE.md` and `metrics_c2.json`.
 
 ## How it works
 
@@ -81,6 +86,13 @@ misspelling of this candidate?" A small deterministic letter-name lookup
   is trusted, so the product never changes a correct word.
 
 ## Previous models, kept for comparison
+
+### C1b — previous default (1,000-word vocab, affrication held out)
+
+`model_c1b.npz` (6,767 bytes) with `metrics_c1b.json`. On its own fresh
+generated exam (2,403 attempts): 94.34% top-1, 99.21% top-3, Dolch-314
+slice 89.41%, correct spellings changed 0% — but affrication only 13.6%
+(n=22), the weakness C2-AFFR was built to attack.
 
 ### v3 — previous default (Dolch-314)
 
