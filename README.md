@@ -13,150 +13,86 @@ no internet after the page loads — built for homeschool families and classroom
 a word aloud; Check mode takes any sound-it-out spelling. Parents can paste in this week's
 spelling list and it joins the model's vocabulary on the spot.
 
-## Default model — v3 (keeper)
+## Default model — C1b (keeper)
 
-**`model_v3.npz` — 3,482 bytes — is the current default model.** On the fresh
-generated exam (203 held-out attempts, all rankers scored matched on the same
-exam):
+**`model_c1b.npz` — 6,767 bytes — is the current default model.** It is the v3
+model with exactly one change: the target vocabulary grows from the 314-word
+Dolch list to a frozen 1,000 words (all 314 Dolch words verbatim + 613 New
+Dolch List 1.1 words in rank order + 73 NGSL 1.2 words in rank order). Same
+recipe, same 47 features, same family weights — a data-only lever,
+pre-registered before training (`c1b-preregistration.md`).
 
-| Metric | v3 (default) | v1 (same exam) |
+On the fresh generated exam (seed 90210; 2,403 held-out attempts,
+pair-disjoint from every prior training/exam pool; all rankers scored on the
+identical exam in one sitting):
+
+| Metric | C1b (default) | Plain edit distance (B0) |
 |---|---|---|
-| Right word ranked #1 | **93.10%** | 72.86% |
-| Right word in top 3 | **99.51%** | 90.64% |
-| th→f/v family (n=21) | **95.2%** | — (v2: 33.3%) |
-| Correct spellings changed | **0%** (314/314 self-rank #1) | 0% |
-| Model size | **3,482 bytes** | 2,521 bytes |
+| Right word ranked #1 | **94.34%** | 77.11% |
+| Right word in top 3 | **99.21%** | 91.09% |
+| Dolch-314 slice, right word #1 | **89.41%** | — |
+| th→f/v family (n=26) | **96.2%** | 69.2% |
+| Cluster-reduction family (n=102) | **82.4%** | 49.0% |
+| Correct spellings changed | **0%** (1,000/1,000 self-rank #1) | 0% |
+| Model size | **6,767 bytes** | — |
 
-> **Disclosure — generated-exam only:** Scored on code-generated exams only; never yet scored on real children's misspellings (the CHES real exam was retired by owner decision on 2026-11-19 after the source archive proved unobtainable — see PROVENANCE).
+On a second, eval-only exam — real misspellings from the Birkbeck
+amalgamation filtered to the 1,000 target words (5,499 pairs; eval-only
+under OTA terms, never shipped) — C1b ranks the right word #1 **42.44%**
+of the time vs 39.59% for plain edit distance.
 
-**What the views are:** v3 keeps the original 16 spelling/phonetic pair
-features and adds four extra "views" of the same attempt (47 features total):
-an onset–rime view (how the attempt's opening cluster and rime line up with
-the candidate), a th-aware sound form (the sound *th* is no longer collapsed
-to *t*, so th→f/v spellings carry their own signal), letter-name features,
-and a developmental family-posterior view — "which known kid-error family
+> **Disclosure — generated-exam only:** The headline numbers are scored on
+> code-generated exams; this model has never been scored on real children's
+> misspellings (the CHES real exam was retired by owner decision on
+> 2026-11-19 after the source archive proved unobtainable — see
+> PROVENANCE). The Birkbeck exam above is eval-only adult/student/child
+> mixed corpus data, not CHES.
+
+> **Vocabulary attribution:** Vocabulary includes words from the New General
+> Service List / New Dolch List by Browne & Culligan, licensed CC BY-SA 4.0.
+> Share-alike applies to the vocabulary list as shipped; no other project
+> data is re-licensed by this.
+
+**What the views are:** C1b keeps v3's feature set — the original 16
+spelling/phonetic pair features plus four extra "views" of the same attempt
+(47 features total): an onset–rime view, a th-aware sound form (the sound
+*th* is no longer collapsed to *t*), letter-name features, and a
+developmental family-posterior view — "which known kid-error family
 (silent-e drop, cluster reduction, th→f, …) best explains this attempt as a
 misspelling of this candidate?" A small deterministic letter-name lookup
-(S2: r→are, u→you, c→see…) rides along at ~0 bytes. Frozen ablations showed
-the family-posterior view carries most of the gain; the full record —
-including the caveat that part of that view's strength may be
-generator-consistency signal — is in `PROVENANCE.md` and `metrics_v3.json`.
+(S2: r→are, u→you, c→see…) rides along at ~0 bytes. The full record is in
+`PROVENANCE.md` and `metrics_c1b.json`.
 
 ## How it works
 
-- **Bounded vocabulary:** the 314-word Dolch list (220 service words + nouns, compiled
-  1936/1948, public domain) — a level's words, not the whole dictionary. That bound is
-  what makes a ~3.5 KB model accurate enough to be useful.
-- **Model:** a logistic-regression *pair ranker*. For a typed attempt it scores every
-  vocabulary word on spelling/phonetic features (edit distance, a code-built
-  "sound form" distance, letter-pattern overlaps, skeleton matches, and the v3
-  views above) and ranks them. Trained on CPU in seconds.
-- **Training data is code, not kids:** practice misspellings are generated by
-  deterministic phonics-error rules (silent-e drop, vowel-team swaps, th→t, wh→w,
-  double-letter errors...) applied to the word list. No child's writing, no personal
-  data, and no frontier-AI output anywhere in training — see `PROVENANCE.md`.
-- **Exact-match rule:** if the attempt already *is* a vocabulary word, it is trusted.
-  The raw model's only self-rank failures were homophones (to/too/two, there/three)
-  that spelling alone cannot separate, so the product never changes a correct word.
+- **Bounded vocabulary:** 1,000 high-value words — the Dolch list (220
+  service words + nouns, compiled 1936/1948, public domain) extended with
+  the modernised New Dolch List and NGSL frequency headwords (CC BY-SA 4.0,
+  see attribution above). That bound is what makes a ~7 KB model accurate
+  enough to be useful.
+- **Model:** a logistic-regression *pair ranker*. For a typed attempt it
+  scores every vocabulary word on spelling/phonetic features and ranks
+  them. Trained on Colab CPU.
+- **Training data is code, not kids:** practice misspellings are generated
+  by deterministic phonics-error rules applied to the word list. No child's
+  writing, no personal data, and no frontier-AI output anywhere in
+  training — see `PROVENANCE.md`.
+- **Exact-match rule:** if the attempt already *is* a vocabulary word, it
+  is trusted, so the product never changes a correct word.
 
 ## Previous models, kept for comparison
 
-### v1 — former keeper
+### v3 — previous default (Dolch-314)
 
-| Metric (v1 development test) | Model | Plain edit-distance baseline |
-|---|---|---|
-| Right word ranked #1 | **86.7%** | 78.3% |
-| Right word in top 3 | **97.5%** | 94.2% |
-| Unseen error patterns (held-out families, n=34) | 91.2% | 91.2% |
-| Correct spellings changed | **0%** | 0% |
-| Model size | **2,521 bytes** | — |
+`model_v3.npz` (3,482 bytes) with `metrics_v3.json`. On its own fresh
+generated exam (203 attempts): 93.10% top-1, 99.51% top-3, th→f/v family
+95.2%, correct spellings changed 0%. On the C1b expanded exam v3 scores
+3.37% — it ranks over the 314-word vocabulary only, so the 686 new target
+words are unreachable for it by construction; that structural gap is the
+point of C1b, not a like-for-like quality comparison.
 
-Pre-registered gates: 4 of 5 passed. The miss is the margin gate (+8.3 points over
-baseline vs the +10 target) — the exact-match rule deliberately spends a few lucky
-collision guesses to guarantee zero false corrections. Weak pattern families so far:
-th→t/d (56%), vowel-team swaps (63%), dropped letters (60%).
+### v1 / v2
 
-Live examples from the v1 runtime: `wos → was` ✓, `teh → the` ✓,
-`becos → because` ✓, `sed → seed` (with *said* #2 — the classic hard one),
-`riting → ring` ✗. (The browser demo still runs v1; v3 is the default model
-file in this repo.)
-
-### v2 — never the default; superseded by v3 the same day
-
-v2's single lever was generator realism: new misspelling families from the
-published developmental taxonomy (cluster reduction, nasal/liquid omission,
-letter-name spellings, affrication, th→f/v), with sampling weights fitted
-off-exam behind a leakage firewall. On its own fresh generated exam it
-scored top-1 **0.720 vs v1's 0.705** (cluster_reduce +0.19 drove the gain),
-false-correction 1.0000 — but on v3's matched exam it scored 0.7685 against
-v3's 0.9310, and v3 beat it on both gated families. v2 was never declared
-keeper as a release and never the default model; `model_v2.npz` and
-`metrics_v2.json` stay here for comparison. Full record in `PROVENANCE.md`.
-
-### Phase 1 view probe — DEVELOPMENT (validation only)
-
-This probe produced the views that became v3. It tested new feature groups
-on top of the frozen v1/v2 features (`features.py` unchanged; new code in
-`features_phase1.py`), measured on the v2 **validation split only** (n=228):
-
-| Configuration (validation top-1) | Score |
-|---|---|
-| Control — all 16 existing features (= v2 ranker) | 0.8333 |
-| Combined new views (47 features) | **0.9342** |
-| Family-posterior view (V5) solo | 0.9167 |
-
-- Combined views: **+10.09 points** over control, clearing the plan's
-  pre-registered +2.0-point bar for proceeding to a v3. Combined top-3 0.9956.
-- th_fv validation top-1 moved **0.20 → 0.80** (small-n caveat: n=5, so
-  1/5 → 4/5 — directionally strong, not precise).
-- **S2 letter-name lookup:** there are 6 real letter-name pairs in the
-  vocabulary; 5 are reachable by S2 (r→are, y→why, u→you, c→see, b→be).
-  'oh' is **not** in the Dolch-314 vocabulary, so o→oh can never exist;
-  i→eye is excluded by design (the attempt "i" is itself a vocabulary word
-  claimed by the exact-match rule). S2 triggered on 0 of 228 validation
-  attempts, so no validation gain was claimed for it.
-- **Generator-consistency caveat for V5:** the family-posterior features ask
-  whether a candidate could have generated the attempt under a known error
-  family, and the validation attempts were produced by those same generator
-  families. Part of V5's win may be generator-consistency signal; that
-  caveat stands for v3 as well and is recorded in `PROVENANCE.md`.
-- False-correction invariant held: **1.0000 (314/314)**, with and without S2.
-- The probe was run while the CHES real-exam keeper gate was still in
-  force; that gate was retired by owner decision on 2026-11-19 (see the
-  disclosure under the default model, and `PROVENANCE.md`).
-
-Full plan and results: `PLAN-VIEWS-SPECIALISTS.md`, `phase0_results.json`,
-`phase1_results.json`. Probe code: `phase1_probe.py`, `phase0_diag.py`.
-
-## Honest limits
-
-- Test spellings are **generated**, not real children's writing. These numbers prove
-  the approach on rule-based errors; they do not prove accuracy on real kids' spelling.
-  The planned real-corpus exam (CHES, from the Birkbeck corpus) was retired by owner
-  decision on 2026-11-19 after the source archive proved unobtainable — so no version
-  of this model has been scored on real children's misspellings. If CHES ever becomes
-  obtainable, scoring the frozen models on it remains a standing check (see
-  `PROVENANCE.md`).
-- The v1 test informed two design fixes during development (disclosed in
-  `SPEC.md`/`PROVENANCE.md`), so treat v1 numbers as development numbers; v2 and v3
-  were judged on fresh generated exams.
-- Homophones (there/their, to/too) need sentence context — out of scope.
-- Dolch has almost no regular **-ed** words, so *jumpt*-type errors are only partly
-  covered (`jumpt → jump`).
-- English only. A practice aid — not a dyslexia or therapy tool.
-
-## Files
-
-- `SPEC.md` — the pre-registered design and gates · `PROVENANCE.md` — data licenses, method, full version history
-- `model_v3.npz` — **the default model (3,482 bytes)** · `metrics_v3.json` — full v3 results
-- `features_phase1.py` — the v3 view features · `train_v3.py` / `gen_v3_data.py` — v3 training + data generation · `fit_weights_v3.py` — the hardened off-exam weight refit
-- `model_v2.npz` / `metrics_v2.json` — v2, kept for comparison · `model_v1.npz` / `metrics_v1.json` — v1, former keeper
-- `PLAN-VIEWS-SPECIALISTS.md` — the views + specialists plan (Phases 0–2)
-- `features.py` — phonetic sound-form + pair features · `gen_v1_data.py` — the misspelling generator
-- `train_v1.py` — v1 training + evaluation · `predict_v1.py` — pure-NumPy runtime
-- `calibrate_threshold*.py` — how the demo's "not in this level's words" rule was calibrated
-- `demo/` — the self-contained browser demo, still running v1 (`build_demo.py` rebuilds it; `parity_test.js`
-  verifies the JS port matches the Python model — 30/30 attempts identical)
-
-Built with AI-agent assistance (Muse, operator role only — code and evaluation, never
-training data). Nothing about this project was trained on any child's data.
+v1 (former keeper) and v2 (never default, superseded) remain in the repo
+with their metrics for comparison. See `PROVENANCE.md` for the full
+history, including the Phase 1 view-probe development record.

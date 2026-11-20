@@ -689,3 +689,57 @@ gates (1 and 2) passed, but v2 is **superseded by v3 on the same day
 0.7685) and on both gated families. v2 was never declared keeper as a
 release, was never the default model in the repo, and is retained in
 the repo (`model_v2.npz`, `metrics_v2.json`) for comparison only.
+
+---
+
+## Release note — v3 pushed as DEFAULT model (2026-11-19)
+
+Executed under the CHES retirement and verdict amendments above, and
+Rusty's standing rule (passes amended gates + improves → GitHub default;
+older models kept for comparison).
+
+- Repo: https://github.com/RustyDrops/Sound_Out_Speller_Tiny_ML (public), branch `main`
+- Commit: `ca63c7ed1ced289d5d6a525af428b331fd82ed20` — "Speller v3 becomes default model (0.931 generated exam; CHES gate retired by owner decision 2026-11-19, generated-exam-only disclosure in README)" (11 files, staged snapshot in `release_v3/`)
+- Contents: README.md (restructured — v3 presented as the DEFAULT model with the generated-exam-only disclosure in its headline section; "Previous models, kept for comparison" covering v1 the former keeper, v2 never-default/superseded, and the condensed Phase 1 dev section), model_v3.npz (default model binary, 3,482 B), model_v2.npz + metrics_v2.json (comparison), metrics_v3.json, features_phase1.py, train_v3.py, gen_v3_data.py, fit_weights_v3.py, PROVENANCE.md (current, incl. the retirement + verdict-amendment sections), PLAN-VIEWS-SPECIALISTS.md.
+- Excluded: all datasets and exam files, Birkbeck/CHES data (never shipped), caches/logs. v1 files already in the repo untouched.
+- Verification (read-back via GitHub API): newest commit on `main` matches `ca63c7ed…`; git blob SHAs match local exactly for all 11 pushed files, including model_v3.npz (`8a4009e9…`) and README.md (`dd79d0a1…`); pre-existing v1 files (model_v1.npz, metrics_v1.json, train_v1.py, SPEC.md, demo/) confirmed still in tree (38 files total).
+
+---
+
+# C1b — NGSL / New Dolch procurement + frozen 1,000-word vocab (2026-11-20)
+
+Decision: autonomous/c1b-DECISION-2026-11-20.md (C1b approved by Rusty,
+decision delegated to Ann, 2026-11-20 14:34 CST). This section records
+procurement and pre-registration only — no C1b training has run, v3
+remains keeper / GitHub default (ca63c7ed), and no GitHub push was made.
+
+## Licence — re-verified at the source at download time (2026-11-20)
+- Source: NGSL / New Dolch List (Browne & Culligan), newgeneralservicelist.com, **CC BY-SA 4.0, commercial allowed** — CONFIRMED on both official pages at download time. The site FAQ states newgeneralservicelist.com is the only official site and the former .org domain is no longer authorised; nothing was taken from .org. Full verbatim evidence + file SHA-256s: `data/ngsl_ndl_source/LICENCE-EVIDENCE-2026-11-20.md`.
+- Attribution, verbatim in PROVENANCE, README, and shipped model.json: "Vocabulary includes words from the New General Service List / New Dolch List by Browne & Culligan, licensed CC BY-SA 4.0."
+- Share-alike is recorded as applying to the vocabulary list as shipped; no other project data is re-licensed by this.
+
+## Frozen vocab — data/vocab_c1b.json (data/vocab.json NOT overwritten)
+Built by build_vocab_c1b.py; audit: autonomous/c1b-vocab-audit.json.
+- Step 1: Dolch-314 verbatim, levels unchanged, Dolch wins duplicates → 314.
+- Step 2: New Dolch List 1.1 in NDL rank order (NDL_11_stats.csv): +613 new (261 duplicates skipped, 0 normalisation exclusions; o'clock→oclock per apostrophe rule) → 927.
+- Step 3: rule fired = NGSL fill — NGSL 1.2 headwords in rank order (NGSL_12_stats.csv): +73 (363 duplicates skipped before target reached) → exactly 1,000 unique normalised words.
+- Normalisation: lowercase; apostrophes/hyphens removed; multiword excluded; headword only. All 686 additions get level prior index 2.
+- Family weights: v3 family weights reused unchanged (data/family_weights_v3.json) — C1b stays a data-only, one-lever candidate.
+- Gates frozen in autonomous/c1b-preregistration.md. CHES gate RETIRED (Rusty, 2026-11-19) — retired, never passed; generated-exam-only disclosure stands.
+
+---
+
+## C1b RESULTS — run on Colab CPU, 2026-11-20 (finalize in train_c1b.py, single run)
+
+**Verdict: C1b PASSES all frozen gates and beats v3 on the expanded exam — C1b becomes the GitHub default, v3 kept for comparison.** Full gate table: autonomous/c1b-VERDICT.md; raw numbers: metrics_c1b.json.
+
+- Training route: Colab CPU exclusively (one bundled zip via GCS staging; runtime deleted after downloads were verified locally — size match + npz/json load checks — and verified gone via list_runtimes). Job record: ~/workspace/colab/speller-c1b/state.json + recover_state.json (the first driver was SIGTERM-killed mid-poll at ~220 s; the runtime was adopted by recover_c1b.py and the in-runtime training completed untouched — training itself ran exactly once). Two earlier driver attempts failed instantly on a bundle-nesting path bug before any training started (0.00 units each).
+- Colab units: balance delta over the successful job window 0.17 (account-wide; another chat's T4 assignment was active for part of the window — estimate), rate×elapsed estimate 0.071 (CPU 0.08/hr × ~3,184 s runtime-active — estimate). Pre-registration estimate was ~0.16.
+- Fresh generated exam (seed 90210, n=2,403; pair-disjoint from all prior pools and the C1b train pool — 1,557 exam candidates dropped for disjointness, recorded in data/c1b_gen_meta.json): **C1b top-1 0.9434**, B0 0.7711 (margin +0.1723), Dolch-314 slice 0.8941 (n: see metrics), v3 on the same expanded exam 0.0337 (v3 ranks over its Dolch-314 vocab only; targets outside it score 0 — disclosed, and the reason the comparison is structural, not a like-for-like quality drop).
+- Per-family C1b top-1 beside headline: th_fv 0.9615 (n=26), cluster_reduce 0.8235 (n=102), generic_drop 0.8400, transpose 0.9922, vowel_swap 0.9294, single_double 1.0000; weakest: affrication 0.1364 (n=22 — held out of training by design, as in v2/v3), ai_e 0.6667 (n=15).
+- False-correction: product self-rank 1.0000 over the full 1,000-word vocab (v3 product definition; S2 on == off by construction); raw model self-rank 0.9920, reported for honesty.
+- Birkbeck-filtered exam (eval-only, OTA 0643, never shipped, NOT CHES): n=5,499 pairs, C1b 0.4244 ≥ B0 0.3959.
+- Size: model_c1b.npz 6,767 B (≤16 KB gate); demo model.json vocab-array encoding 8,958 B, counted and reported.
+- CHES gate: RETIRED (Rusty, 2026-11-19) — cited as retired, never passed. Disclosure stands: generated-exam only, never scored on real children's misspellings.
+- Attribution: "Vocabulary includes words from the New General Service List / New Dolch List by Browne & Culligan, licensed CC BY-SA 4.0."
+- Terms safety: no frontier-model output in data, labels, filtering, or selection; family weights = v3 weights reused unchanged; Birkbeck file eval-only and never shipped.
