@@ -1,0 +1,633 @@
+{
+  "split": {
+    "train": 1085,
+    "val": 245,
+    "test": 154
+  },
+  "train_pairs": 18630,
+  "exam_n": 203,
+  "ablations": {
+    "control_base16": {
+      "val": {
+        "n": 245,
+        "top1": 0.8489795918367347,
+        "top3": 0.9795918367346939,
+        "top5": 0.9877551020408163,
+        "per_family_top1": {
+          "c_k": 0.75,
+          "ck_k": 1.0,
+          "cluster_reduce": 0.4,
+          "double_single": 1.0,
+          "er_ur": 1.0,
+          "generic_drop": 0.7407,
+          "nasal_liquid_omit": 0.8571,
+          "silent_e_drop": 1.0,
+          "single_double": 1.0,
+          "th_fv": 0.4,
+          "th_td": 0.4286,
+          "transpose": 0.75,
+          "unstressed_drop": 0.9474,
+          "vowel_swap": 0.8649,
+          "vowel_team_swap": 0.8889,
+          "y_i": 0.9231
+        }
+      },
+      "exam": {
+        "n": 203,
+        "top1": 0.7586206896551724,
+        "top3": 0.9261083743842364,
+        "top5": 0.9704433497536946,
+        "per_family_top1": {
+          "cluster_reduce": 0.6,
+          "generic_drop": 0.74,
+          "nasal_liquid_omit": 1.0,
+          "single_double": 1.0,
+          "th_fv": 0.381,
+          "transpose": 0.8228,
+          "vowel_swap": 0.9375
+        }
+      }
+    },
+    "plus_V4_onset_rime": {
+      "val": {
+        "n": 245,
+        "top1": 0.8408163265306122,
+        "top3": 0.9877551020408163,
+        "top5": 0.9959183673469387,
+        "per_family_top1": {
+          "c_k": 0.75,
+          "ck_k": 1.0,
+          "cluster_reduce": 0.4,
+          "double_single": 1.0,
+          "er_ur": 1.0,
+          "generic_drop": 0.7037,
+          "nasal_liquid_omit": 0.8571,
+          "silent_e_drop": 1.0,
+          "single_double": 1.0,
+          "th_fv": 0.4,
+          "th_td": 0.4286,
+          "transpose": 0.8438,
+          "unstressed_drop": 0.9474,
+          "vowel_swap": 0.7838,
+          "vowel_team_swap": 0.8889,
+          "y_i": 0.9231
+        }
+      },
+      "exam": {
+        "n": 203,
+        "top1": 0.7733990147783252,
+        "top3": 0.9359605911330049,
+        "top5": 0.9704433497536946,
+        "per_family_top1": {
+          "cluster_reduce": 0.75,
+          "generic_drop": 0.72,
+          "nasal_liquid_omit": 1.0,
+          "single_double": 1.0,
+          "th_fv": 0.4286,
+          "transpose": 0.8228,
+          "vowel_swap": 0.9375
+        }
+      }
+    },
+    "plus_TH_th_aware": {
+      "val": {
+        "n": 245,
+        "top1": 0.8693877551020408,
+        "top3": 0.9918367346938776,
+        "top5": 0.9918367346938776,
+        "per_family_top1": {
+          "c_k": 0.75,
+          "ck_k": 1.0,
+          "cluster_reduce": 0.4,
+          "double_single": 1.0,
+          "er_ur": 1.0,
+          "generic_drop": 0.7407,
+          "nasal_liquid_omit": 0.8571,
+          "silent_e_drop": 1.0,
+          "single_double": 1.0,
+          "th_fv": 0.6,
+          "th_td": 0.8571,
+          "transpose": 0.75,
+          "unstressed_drop": 0.9474,
+          "vowel_swap": 0.8919,
+          "vowel_team_swap": 0.8889,
+          "y_i": 0.9231
+        }
+      },
+      "exam": {
+        "n": 203,
+        "top1": 0.7684729064039408,
+        "top3": 0.9507389162561576,
+        "top5": 0.9901477832512315,
+        "per_family_top1": {
+          "cluster_reduce": 0.5,
+          "generic_drop": 0.66,
+          "nasal_liquid_omit": 1.0,
+          "single_double": 1.0,
+          "th_fv": 0.619,
+          "transpose": 0.8608,
+          "vowel_swap": 0.9375
+        }
+      }
+    },
+    "plus_V3_letter_name": {
+      "val": {
+        "n": 245,
+        "top1": 0.8489795918367347,
+        "top3": 0.9795918367346939,
+        "top5": 0.9877551020408163,
+        "per_family_top1": {
+          "c_k": 0.75,
+          "ck_k": 1.0,
+          "cluster_reduce": 0.4,
+          "double_single": 1.0,
+          "er_ur": 1.0,
+          "generic_drop": 0.7407,
+          "nasal_liquid_omit": 0.8571,
+          "silent_e_drop": 1.0,
+          "single_double": 1.0,
+          "th_fv": 0.4,
+          "th_td": 0.4286,
+          "transpose": 0.75,
+          "unstressed_drop": 0.9474,
+          "vowel_swap": 0.8649,
+          "vowel_team_swap": 0.8889,
+          "y_i": 0.9231
+        }
+      },
+      "exam": {
+        "n": 203,
+        "top1": 0.7536945812807881,
+        "top3": 0.9310344827586207,
+        "top5": 0.9704433497536946,
+        "per_family_top1": {
+          "cluster_reduce": 0.6,
+          "generic_drop": 0.72,
+          "nasal_liquid_omit": 1.0,
+          "single_double": 1.0,
+          "th_fv": 0.381,
+          "transpose": 0.8228,
+          "vowel_swap": 0.9375
+        }
+      }
+    },
+    "plus_V5_family_posterior": {
+      "val": {
+        "n": 245,
+        "top1": 0.9224489795918367,
+        "top3": 1.0,
+        "top5": 1.0,
+        "per_family_top1": {
+          "c_k": 1.0,
+          "ck_k": 1.0,
+          "cluster_reduce": 0.6,
+          "double_single": 1.0,
+          "er_ur": 1.0,
+          "generic_drop": 0.7778,
+          "nasal_liquid_omit": 0.8571,
+          "silent_e_drop": 1.0,
+          "single_double": 0.9783,
+          "th_fv": 1.0,
+          "th_td": 1.0,
+          "transpose": 0.9688,
+          "unstressed_drop": 0.8947,
+          "vowel_swap": 0.8919,
+          "vowel_team_swap": 0.9444,
+          "y_i": 1.0
+        }
+      },
+      "exam": {
+        "n": 203,
+        "top1": 0.9310344827586207,
+        "top3": 0.9950738916256158,
+        "top5": 1.0,
+        "per_family_top1": {
+          "cluster_reduce": 0.8,
+          "generic_drop": 0.84,
+          "nasal_liquid_omit": 1.0,
+          "single_double": 1.0,
+          "th_fv": 0.9524,
+          "transpose": 0.9873,
+          "vowel_swap": 1.0
+        }
+      }
+    },
+    "combined_views_only": {
+      "val": {
+        "n": 245,
+        "top1": 0.9183673469387755,
+        "top3": 1.0,
+        "top5": 1.0,
+        "per_family_top1": {
+          "c_k": 1.0,
+          "ck_k": 1.0,
+          "cluster_reduce": 0.6,
+          "double_single": 1.0,
+          "er_ur": 1.0,
+          "generic_drop": 0.7778,
+          "nasal_liquid_omit": 0.8571,
+          "silent_e_drop": 1.0,
+          "single_double": 0.9783,
+          "th_fv": 1.0,
+          "th_td": 1.0,
+          "transpose": 0.9688,
+          "unstressed_drop": 0.8947,
+          "vowel_swap": 0.8649,
+          "vowel_team_swap": 0.9444,
+          "y_i": 1.0
+        }
+      },
+      "exam": {
+        "n": 203,
+        "top1": 0.9310344827586207,
+        "top3": 0.9950738916256158,
+        "top5": 1.0,
+        "per_family_top1": {
+          "cluster_reduce": 0.8,
+          "generic_drop": 0.84,
+          "nasal_liquid_omit": 1.0,
+          "single_double": 1.0,
+          "th_fv": 0.9524,
+          "transpose": 0.9873,
+          "vowel_swap": 1.0
+        }
+      }
+    },
+    "combined_minus_V4_onset_rime": {
+      "val": {
+        "n": 245,
+        "top1": 0.9183673469387755,
+        "top3": 1.0,
+        "top5": 1.0,
+        "per_family_top1": {
+          "c_k": 1.0,
+          "ck_k": 1.0,
+          "cluster_reduce": 0.6,
+          "double_single": 1.0,
+          "er_ur": 1.0,
+          "generic_drop": 0.7778,
+          "nasal_liquid_omit": 0.8571,
+          "silent_e_drop": 1.0,
+          "single_double": 0.9783,
+          "th_fv": 1.0,
+          "th_td": 1.0,
+          "transpose": 0.9688,
+          "unstressed_drop": 0.8947,
+          "vowel_swap": 0.8649,
+          "vowel_team_swap": 0.9444,
+          "y_i": 1.0
+        }
+      },
+      "exam": {
+        "n": 203,
+        "top1": 0.9310344827586207,
+        "top3": 1.0,
+        "top5": 1.0,
+        "per_family_top1": {
+          "cluster_reduce": 0.8,
+          "generic_drop": 0.84,
+          "nasal_liquid_omit": 1.0,
+          "single_double": 1.0,
+          "th_fv": 0.9524,
+          "transpose": 0.9873,
+          "vowel_swap": 1.0
+        }
+      }
+    },
+    "combined_minus_TH_th_aware": {
+      "val": {
+        "n": 245,
+        "top1": 0.9224489795918367,
+        "top3": 1.0,
+        "top5": 1.0,
+        "per_family_top1": {
+          "c_k": 1.0,
+          "ck_k": 1.0,
+          "cluster_reduce": 0.6,
+          "double_single": 1.0,
+          "er_ur": 1.0,
+          "generic_drop": 0.7778,
+          "nasal_liquid_omit": 0.8571,
+          "silent_e_drop": 1.0,
+          "single_double": 0.9783,
+          "th_fv": 1.0,
+          "th_td": 1.0,
+          "transpose": 0.9688,
+          "unstressed_drop": 0.8947,
+          "vowel_swap": 0.8919,
+          "vowel_team_swap": 0.9444,
+          "y_i": 1.0
+        }
+      },
+      "exam": {
+        "n": 203,
+        "top1": 0.9310344827586207,
+        "top3": 0.9950738916256158,
+        "top5": 1.0,
+        "per_family_top1": {
+          "cluster_reduce": 0.8,
+          "generic_drop": 0.84,
+          "nasal_liquid_omit": 1.0,
+          "single_double": 1.0,
+          "th_fv": 0.9524,
+          "transpose": 0.9873,
+          "vowel_swap": 1.0
+        }
+      }
+    },
+    "combined_minus_V3_letter_name": {
+      "val": {
+        "n": 245,
+        "top1": 0.9183673469387755,
+        "top3": 1.0,
+        "top5": 1.0,
+        "per_family_top1": {
+          "c_k": 1.0,
+          "ck_k": 1.0,
+          "cluster_reduce": 0.6,
+          "double_single": 1.0,
+          "er_ur": 1.0,
+          "generic_drop": 0.7778,
+          "nasal_liquid_omit": 0.8571,
+          "silent_e_drop": 1.0,
+          "single_double": 0.9783,
+          "th_fv": 1.0,
+          "th_td": 1.0,
+          "transpose": 0.9688,
+          "unstressed_drop": 0.8947,
+          "vowel_swap": 0.8649,
+          "vowel_team_swap": 0.9444,
+          "y_i": 1.0
+        }
+      },
+      "exam": {
+        "n": 203,
+        "top1": 0.9310344827586207,
+        "top3": 0.9950738916256158,
+        "top5": 1.0,
+        "per_family_top1": {
+          "cluster_reduce": 0.8,
+          "generic_drop": 0.84,
+          "nasal_liquid_omit": 1.0,
+          "single_double": 1.0,
+          "th_fv": 0.9524,
+          "transpose": 0.9873,
+          "vowel_swap": 1.0
+        }
+      }
+    },
+    "combined_minus_V5_family_posterior": {
+      "val": {
+        "n": 245,
+        "top1": 0.8489795918367347,
+        "top3": 0.9918367346938776,
+        "top5": 0.9918367346938776,
+        "per_family_top1": {
+          "c_k": 0.75,
+          "ck_k": 1.0,
+          "cluster_reduce": 0.4,
+          "double_single": 1.0,
+          "er_ur": 1.0,
+          "generic_drop": 0.6667,
+          "nasal_liquid_omit": 0.8571,
+          "silent_e_drop": 1.0,
+          "single_double": 1.0,
+          "th_fv": 0.6,
+          "th_td": 0.8571,
+          "transpose": 0.8125,
+          "unstressed_drop": 0.9474,
+          "vowel_swap": 0.7838,
+          "vowel_team_swap": 0.8889,
+          "y_i": 0.9231
+        }
+      },
+      "exam": {
+        "n": 203,
+        "top1": 0.8029556650246306,
+        "top3": 0.9704433497536946,
+        "top5": 0.9802955665024631,
+        "per_family_top1": {
+          "cluster_reduce": 0.6,
+          "generic_drop": 0.72,
+          "nasal_liquid_omit": 1.0,
+          "single_double": 1.0,
+          "th_fv": 0.7143,
+          "transpose": 0.8608,
+          "vowel_swap": 0.9375
+        }
+      }
+    },
+    "combined_plus_S2_v3_product": {
+      "val": {
+        "n": 245,
+        "top1": 0.9183673469387755,
+        "top3": 1.0,
+        "top5": 1.0,
+        "per_family_top1": {
+          "c_k": 1.0,
+          "ck_k": 1.0,
+          "cluster_reduce": 0.6,
+          "double_single": 1.0,
+          "er_ur": 1.0,
+          "generic_drop": 0.7778,
+          "nasal_liquid_omit": 0.8571,
+          "silent_e_drop": 1.0,
+          "single_double": 0.9783,
+          "th_fv": 1.0,
+          "th_td": 1.0,
+          "transpose": 0.9688,
+          "unstressed_drop": 0.8947,
+          "vowel_swap": 0.8649,
+          "vowel_team_swap": 0.9444,
+          "y_i": 1.0
+        }
+      },
+      "exam": {
+        "n": 203,
+        "top1": 0.9310344827586207,
+        "top3": 0.9950738916256158,
+        "top5": 1.0,
+        "per_family_top1": {
+          "cluster_reduce": 0.8,
+          "generic_drop": 0.84,
+          "nasal_liquid_omit": 1.0,
+          "single_double": 1.0,
+          "th_fv": 0.9524,
+          "transpose": 0.9873,
+          "vowel_swap": 1.0
+        }
+      }
+    }
+  },
+  "dev_test_v3_product": {
+    "n": 154,
+    "top1": 0.9285714285714286,
+    "top3": 1.0,
+    "top5": 1.0,
+    "per_family_top1": {
+      "c_k": 1.0,
+      "cluster_reduce": 0.6667,
+      "double_single": 0.7143,
+      "generic_drop": 0.9286,
+      "nasal_liquid_omit": 1.0,
+      "silent_e_drop": 1.0,
+      "single_double": 1.0,
+      "th_td": 0.75,
+      "transpose": 1.0,
+      "unstressed_drop": 0.9524,
+      "vowel_swap": 0.95,
+      "vowel_team_swap": 1.0,
+      "y_i": 0.7778
+    }
+  },
+  "fresh_exam": {
+    "v3_product": {
+      "n": 203,
+      "top1": 0.9310344827586207,
+      "top3": 0.9950738916256158,
+      "top5": 1.0,
+      "per_family_top1": {
+        "cluster_reduce": 0.8,
+        "generic_drop": 0.84,
+        "nasal_liquid_omit": 1.0,
+        "single_double": 1.0,
+        "th_fv": 0.9524,
+        "transpose": 0.9873,
+        "vowel_swap": 1.0
+      }
+    },
+    "v3_views_only": {
+      "n": 203,
+      "top1": 0.9310344827586207,
+      "top3": 0.9950738916256158,
+      "top5": 1.0,
+      "per_family_top1": {
+        "cluster_reduce": 0.8,
+        "generic_drop": 0.84,
+        "nasal_liquid_omit": 1.0,
+        "single_double": 1.0,
+        "th_fv": 0.9524,
+        "transpose": 0.9873,
+        "vowel_swap": 1.0
+      }
+    },
+    "v2_product": {
+      "n": 203,
+      "top1": 0.7684729064039408,
+      "top3": 0.916256157635468,
+      "top5": 0.9704433497536946,
+      "per_family_top1": {
+        "cluster_reduce": 0.6,
+        "generic_drop": 0.78,
+        "nasal_liquid_omit": 1.0,
+        "single_double": 1.0,
+        "th_fv": 0.3333,
+        "transpose": 0.8354,
+        "vowel_swap": 0.9375
+      }
+    },
+    "v1_product": {
+      "n": 203,
+      "top1": 0.729064039408867,
+      "top3": 0.9064039408866995,
+      "top5": 0.9556650246305419,
+      "per_family_top1": {
+        "cluster_reduce": 0.45,
+        "generic_drop": 0.68,
+        "nasal_liquid_omit": 1.0,
+        "single_double": 1.0,
+        "th_fv": 0.2381,
+        "transpose": 0.8608,
+        "vowel_swap": 0.9375
+      }
+    },
+    "B0_levenshtein": {
+      "n": 203,
+      "top1": 0.46798029556650245,
+      "top3": 0.7438423645320197,
+      "top5": 0.8472906403940886,
+      "per_family_top1": {
+        "cluster_reduce": 0.5,
+        "generic_drop": 0.3,
+        "nasal_liquid_omit": 0.625,
+        "single_double": 1.0,
+        "th_fv": 0.381,
+        "transpose": 0.4304,
+        "vowel_swap": 0.875
+      }
+    }
+  },
+  "false_correction": {
+    "product_self_top1_S2_on": 1.0,
+    "product_self_top1_S2_off": 1.0,
+    "raw_model_self_top1": 0.9840764331210191,
+    "n_words": 314
+  },
+  "probe_homophone_collisions": {
+    "n": 6,
+    "v3_product": {
+      "n": 6,
+      "top1": 0.0,
+      "top3": 0.8333333333333334,
+      "top5": 1.0,
+      "per_family_top1": {
+        "cluster_reduce": 0.0,
+        "generic_drop": 0.0
+      }
+    },
+    "v2_product": {
+      "n": 6,
+      "top1": 0.0,
+      "top3": 0.6666666666666666,
+      "top5": 0.8333333333333334,
+      "per_family_top1": {
+        "cluster_reduce": 0.0,
+        "generic_drop": 0.0
+      }
+    },
+    "v1_product": {
+      "n": 6,
+      "top1": 0.0,
+      "top3": 0.6666666666666666,
+      "top5": 0.8333333333333334,
+      "per_family_top1": {
+        "cluster_reduce": 0.0,
+        "generic_drop": 0.0
+      }
+    },
+    "note": "Product exact-match rule trusts the attempt as correctly spelled, so collision rows are expected to score ~0 top-1 by design; report-only."
+  },
+  "probe_oov": {
+    "n_attempts": 65,
+    "v3_confidence_rule_accept_rate": 0.3230769230769231,
+    "v2_confidence_rule_accept_rate": 0.2153846153846154,
+    "v1_confidence_rule_accept_rate": 0.18461538461538463,
+    "note": "Acceptance uses the UNCHANGED v1 demo confidence rule (threshold_v1.json). Lower acceptance on OOV attempts = better rejection. Report-only probe."
+  },
+  "g7_generator_variant_diagnostic": {
+    "label": "Robustness check against rule memorization (EG G7) \u2014 NOT a transfer bound.",
+    "held_out_realization": "th->v (all th->v training rows removed from the diagnostic model)",
+    "train_rows_removed": 7,
+    "n_diag_rows": 13,
+    "diag_model_top1": 1.0,
+    "v3_product_top1_same_rows": 1.0,
+    "v2_product_top1_same_rows": 0.46153846153846156,
+    "note": "v2 and v3 product trained on th->v pairs in their own pools, so their scores on these rows are not realization-unseen; the claim rests on the diagnostic-model contrast (PROVENANCE clarification 2)."
+  },
+  "model_size_bytes": 3482,
+  "gates": {
+    "1_fresh_exam_top1_v3>=v1_AND_v3>=v2": true,
+    "2_false_correction_stays_0 (product self-rank == 1.000, S2 on and off)": true,
+    "3_real_exam_CHES (v3 >= v1 AND v3 >= B0+0.05)": null,
+    "4_family_floors (th_fv >= 0.286 AND cluster_reduce >= 0.577)": true,
+    "5_size_<=_16KB": true
+  },
+  "real_exam_ches": {
+    "status": "BLOCKED \u2014 standalone CHES file not obtainable legitimately on 2026-11-19 (OTA handle resolver HTTP 500; author's own download offers only the amalgamated Birkbeck file in which CHES rows are not separately identifiable). Gate 3 NOT EVALUATED and therefore NOT PASSED. No substitute real corpus scored.",
+    "v1_top1": null,
+    "v3_top1": null,
+    "B0_top1": null
+  },
+  "verdict": "Generated-exam gates PASS (1, 2, 4, 5); KEEPER DEFERRED to CHES \u2014 gate 3 (real CHES exam) is blocked/not evaluated, so v3 cannot be declared keeper on this run regardless of generated-exam results. v1 remains the keeper.",
+  "elapsed_s": 677.0
+}

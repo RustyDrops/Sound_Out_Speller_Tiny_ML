@@ -1,0 +1,150 @@
+{
+  "vocab_size": 314,
+  "train_pairs": 17265,
+  "v2_dev": {
+    "val": {
+      "n": 228,
+      "top1": 0.8333333333333334,
+      "top3": 0.9649122807017544,
+      "top5": 0.9868421052631579,
+      "per_family_top1": {
+        "c_k": 0.875,
+        "cluster_reduce": 0.25,
+        "double_single": 1.0,
+        "er_ur": 1.0,
+        "generic_drop": 0.5333,
+        "nasal_liquid_omit": 0.8571,
+        "silent_e_drop": 0.8333,
+        "single_double": 1.0,
+        "th_fv": 0.2,
+        "th_td": 1.0,
+        "transpose": 0.8182,
+        "unstressed_drop": 1.0,
+        "vowel_swap": 0.7826,
+        "vowel_team_swap": 0.8462,
+        "y_i": 0.8125
+      }
+    },
+    "test": {
+      "n": 134,
+      "top1": 0.8805970149253731,
+      "top3": 0.9701492537313433,
+      "top5": 0.9925373134328358,
+      "per_family_top1": {
+        "cluster_reduce": 0.8333,
+        "double_single": 1.0,
+        "generic_drop": 0.7143,
+        "silent_e_drop": 1.0,
+        "single_double": 1.0,
+        "th_fv": 0.5,
+        "transpose": 0.7333,
+        "unstressed_drop": 1.0,
+        "vowel_swap": 0.8929,
+        "vowel_team_swap": 1.0,
+        "y_i": 0.8333
+      }
+    }
+  },
+  "fresh_exam": {
+    "v2_product": {
+      "n": 261,
+      "top1": 0.7203065134099617,
+      "top3": 0.9348659003831418,
+      "top5": 0.9655172413793104,
+      "per_family_top1": {
+        "affrication": 0.6667,
+        "cluster_reduce": 0.5769,
+        "generic_drop": 0.6471,
+        "letter_name": 0.1667,
+        "nasal_liquid_omit": 0.8462,
+        "single_double": 1.0,
+        "th_fv": 0.2857,
+        "transpose": 0.8372,
+        "vowel_swap": 1.0
+      }
+    },
+    "v1_product": {
+      "n": 261,
+      "top1": 0.7049808429118773,
+      "top3": 0.9080459770114943,
+      "top5": 0.9616858237547893,
+      "per_family_top1": {
+        "affrication": 0.6667,
+        "cluster_reduce": 0.3846,
+        "generic_drop": 0.6324,
+        "letter_name": 0.1667,
+        "nasal_liquid_omit": 0.8462,
+        "single_double": 1.0,
+        "th_fv": 0.2381,
+        "transpose": 0.8721,
+        "vowel_swap": 1.0
+      }
+    },
+    "B0_levenshtein": {
+      "n": 261,
+      "top1": 0.48659003831417624,
+      "top3": 0.7662835249042146,
+      "top5": 0.8812260536398467,
+      "per_family_top1": {
+        "affrication": 0.6667,
+        "cluster_reduce": 0.3462,
+        "generic_drop": 0.4559,
+        "letter_name": 0.0,
+        "nasal_liquid_omit": 0.4615,
+        "single_double": 1.0,
+        "th_fv": 0.3333,
+        "transpose": 0.4302,
+        "vowel_swap": 0.9333
+      }
+    }
+  },
+  "false_correction": {
+    "product_self_top1": 1.0,
+    "model_raw_self_top1": 0.9745222929936306,
+    "n_words": 314
+  },
+  "probe_homophone_collisions": {
+    "n": 11,
+    "v2_product": {
+      "n": 11,
+      "top1": 0.0,
+      "top3": 0.9090909090909091,
+      "top5": 0.9090909090909091,
+      "per_family_top1": {
+        "cluster_reduce": 0.0,
+        "generic_drop": 0.0
+      }
+    },
+    "v1_product": {
+      "n": 11,
+      "top1": 0.0,
+      "top3": 0.7272727272727273,
+      "top5": 0.9090909090909091,
+      "per_family_top1": {
+        "cluster_reduce": 0.0,
+        "generic_drop": 0.0
+      }
+    },
+    "note": "Product exact-match rule trusts the attempt as correctly spelled, so collision rows are expected to score ~0 top-1 by design; reported plainly, not gated (pre-registered)."
+  },
+  "probe_oov": {
+    "n_attempts": 65,
+    "v2_confidence_rule_accept_rate": 0.2153846153846154,
+    "v1_confidence_rule_accept_rate": 0.18461538461538463,
+    "note": "Acceptance uses the UNCHANGED v1 demo confidence rule (threshold_v1.json). Lower acceptance on OOV attempts = better rejection. Report-only probe."
+  },
+  "model_size_bytes": 2520,
+  "gates": {
+    "1_fresh_exam_top1_v2>=v1": true,
+    "2_false_correction_stays_0 (product self-rank == 1.000)": true,
+    "3_real_exam_CHES (v2 >= v1 AND v2 >= B0+0.05)": null
+  },
+  "real_exam_ches": {
+    "status": "BLOCKED \u2014 standalone CHES file not obtainable legitimately on 2026-11-19 (OTA handle resolver HTTP 500 via browser fetch, retries exhausted; OTA header unreachable; author's own download offers only the amalgamated Birkbeck file in which CHES rows are not separately identifiable). Gate 3 NOT EVALUATED and therefore NOT PASSED. No substitute real corpus scored.",
+    "v1_top1": null,
+    "v2_top1": null,
+    "B0_top1": null
+  },
+  "verdict": "NOT KEEPER \u2014 gate 3 (real CHES exam) blocked/not passed; v2 cannot be declared keeper on this run regardless of generated-exam results. v1 remains the keeper.",
+  "elapsed_s": 149.7
+}

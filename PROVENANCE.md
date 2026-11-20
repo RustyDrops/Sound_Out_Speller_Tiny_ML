@@ -291,3 +291,401 @@ vocabulary; 6 real pairs, 5 S2-reachable) are in the plan's Phase 1
 results section and `phase1_results.json`. Next step is Phase 2 —
 a v3 pre-registration — and the CHES gate (Step 0 of the plan) still
 blocks any keeper declaration.
+
+---
+
+## Release note — Phase 1 view probe pushed as DEVELOPMENT update (2026-11-19)
+
+Pushed at Rusty's instruction ("push the winners") as a clearly-labeled
+DEVELOPMENT update — **not a release, not a new keeper; v1 remains the
+keeper and no v3 has been trained.**
+
+- Repo: https://github.com/RustyDrops/Sound_Out_Speller_Tiny_ML (public), branch `main`
+- Commit: `867ff8819888ecac738630057352f48e6bd19390` — "Speller Phase 1 view probe (dev, validation-only): combined views +10.09 pts; v1 remains keeper, CHES gate pending" (parent e6bd6f92; 8 files)
+- Contents (staged snapshot in `release_phase1/`): README.md (v1 section intact + new "Phase 1 view probe — DEVELOPMENT (validation only, not a release)" section with the combined 0.9342 vs 0.8333 control, V5 solo 0.9167, th_fv 0.20→0.80 small-n caveat, S2 note with the 'oh'-not-in-vocab correction, V5 generator-consistency caveat, false-correction 1.0000, and the standing CHES keeper gate), PLAN-VIEWS-SPECIALISTS.md (full), PROVENANCE.md (full local copy as of the push), features_phase1.py, phase1_probe.py, phase1_results.json, phase0_diag.py, phase0_results.json.
+- Excluded: all datasets and exam files, Birkbeck/CHES data (never shipped), model binaries (no new model exists), caches/logs.
+- Verification (read-back via GitHub API): newest commit on main matches; git blob SHAs match local exactly for all 8 pushed files, including phase1_results.json (`e76c3ad9…`) and features_phase1.py (`bee20c2a…`); pre-existing v1 files (model_v1.npz, metrics_v1.json, train_v1.py, demo/, promo/, SPEC.md) confirmed still in tree.
+
+---
+
+## Elephant-Goldfish review of the views + specialists round (2026-11-19)
+
+EG review done — full record in `~/workspace/micro-edge-pilot/EG-REVIEW-2026-11-19.md`
+(35 findings: 29 accepted, 6 accepted-with-changes, 0 rejected; Luna cost
+$0.006224; feasibility lens run by the elephant after two goldfish
+disconnects, logged in the review). Amended next round for this model:
+**v3** — pre-register and train FIRST in the restart order (local CPU,
+0 units), but only after the L5 weight refit (attempt-overlap exclusion
+added to the Dolch-target firewall; the amalgamated Birkbeck file's own
+terms recorded in writing; v2's fitted weights are NOT reused). Gates:
+fresh generated exam (new seed) v3 >= v1 AND v3 >= v2, false-correction
+0, per-family floors, size <= 16 KB, plus the CHES gate verbatim
+whenever CHES is obtainable — CHES still blocked means v3 is NOT
+KEEPER regardless of generated numbers. A leave-one-family-out
+generator-variant diagnostic is included and labelled a robustness
+check, not a transfer bound. C1b vocab growth stays held.
+
+---
+
+# v3 — WEIGHT REFIT (EG L5 hardening; done 2026-11-19 BEFORE any v3 training, fitting for v3, or exam scoring)
+
+Per EG-REVIEW-2026-11-19 finding L5 (accepted-with-changes) and its adopted
+hardening, mandatory before v3 trains. Script: `fit_weights_v3.py`.
+Output: `data/family_weights_v3.json`. **v2's fitted weights are NOT reused
+by v3.**
+
+## The amalgamated file's own usage terms — recorded in writing (L5 (ii))
+- The local file `data/birkbeck_eval_only/missp.dat` is the `birkbeck` file
+  from Roger Mitton's own download page (dcs.bbk.ac.uk/~ROGER/corpora.html,
+  re-read 2026-11-19): "an amalgamation of errors taken from the
+  native-speaker section (British or American writers) of the Birkbeck
+  spelling error corpus... available as separate files with detailed
+  documentation from the Oxford Text Archive." The page offers the file for
+  download and states **no separate license or reuse terms for the
+  amalgamated file itself**; the file carries no license header.
+- The underlying corpus is Oxford Text Archive item 0643 (Birkbeck Spelling
+  Error Corpus, Mitton 1985); OTA catalogue lists it "Publicly Available"
+  and OTA standard terms are research use, no redistribution.
+- Project treatment (the stricter of the two governs): the amalgamation is
+  used under the OTA terms — EVAL/FITTING ONLY, locally; no Birkbeck/CHES
+  data or derived data ships, is published, or is committed to any repo.
+  CHES rows are inside the amalgamation but are NOT separately
+  identifiable and are never relabelled as CHES.
+
+## Refit rules (L5 (i) + stricter reading, as implemented)
+Same deterministic edit-operation classifier and frozen category→family
+mapping as `fit_weights_v2.py`. Exclusions, in order:
+1. Form filters (as v2): both strings must be `[a-z]+`, target != attempt.
+2. **v2 firewall (kept):** target in Dolch-314 → excluded.
+3. **NEW attempt-overlap exclusion:** attempt string (normalized =
+   lowercased, the v2 fit's handling) appears among the attempt strings of
+   ANY Dolch-target row in the file → excluded. Stricter reading adopted:
+   the exclusion set is built from every parsed Dolch-target row BEFORE
+   any other filter is applied (1,638 distinct attempt strings), because an
+   attempt recorded against a Dolch word could constitute exam material
+   (the exam is CHES∩Dolch-314 attempts) regardless of how its own row
+   would have been filtered. Rationale recorded per the tasking: exclude
+   any fitting pair whose attempt string appears in, or could constitute,
+   exam material.
+
+## Refit result
+- Pairs in file: 36,133 · fitted: **32,279** (v2 fit: 32,885) ·
+  skipped by Dolch-target firewall: 1,961 · skipped by the NEW
+  attempt-overlap exclusion: **606** · skipped by form filters: 1,287.
+- Category proportions barely move (other 0.5334 vs v2 0.531; generic_drop
+  0.2246 vs 0.2263; letter_name falls 0.0004 → 0.00009 — most single-letter
+  attempts are, unsurprisingly, also recorded against Dolch words). As in
+  v2, the 0.01 per-family floor in training sampling limits the practical
+  effect; the refit is a provenance hardening, not a performance lever,
+  and is reported as such.
+
+---
+
+# v3 — PRE-REGISTRATION (written 2026-11-19 BEFORE any v3 training or exam scoring; refit above precedes it)
+
+Views + specialists plan, Phase 2 (`PLAN-VIEWS-SPECIALISTS.md`), as amended
+by EG-REVIEW-2026-11-19 §4 (Speller). Local CPU only, 0 Colab units.
+Entered from `V3-PREREGISTRATION-DRAFT-2026-11-19.md` with the draft's two
+bracketed choices CONFIRMED (training seed 20261120, exam seed 41729) and
+two amendments the draft predated: the generator weights are the **refit
+v3 weights** (section above), not v2's; and the G7 generator-variant
+diagnostic is specified below.
+
+## The one lever
+Feature views ONLY. The ranker's feature set grows from v2's frozen 16
+(`features.py`, untouched) by the four Phase 1 groups in
+`features_phase1.py`, frozen exactly as Phase 1 left them (EG L6):
+- V4 onset-rime extension (3 feats) — Phase 1: +1.32 val top-1 alone.
+- TH th-aware sound form (3 feats) — Phase 1: +1.32 alone; th_fv 0.20→0.40.
+- V3 letter-name features (3 feats) — Phase 1: +0.00 alone; a guard, not a
+  ranking view. Included because the plan froze it in the combined
+  configuration that passed the bar; ablated below.
+- V5 developmental-family posterior (22 feats) — Phase 1: +9.21 alone
+  (solo 0.9167, strongest single view).
+Total: 47 features. Plus ONE named deterministic component, not a lever:
+- S2 letter-name lookup (~0 bytes, deterministic, NOT learned): ranks the
+  parsed word first when an attempt parses cleanly as letter names, the
+  parsed word is in the vocabulary, and the attempt is not itself a
+  vocabulary word. Vocab-checked coverage is 5 pairs (r→are, y→why, u→you,
+  c→see, b→be); 'oh' is not in Dolch-314 so no o→oh pair exists; i→eye is
+  excluded by design (exact-match rule). Phase 1 validation effect: zero
+  triggers in 228 attempts — no validation number exists for S2 and none is
+  claimed; its component check is a smoke check, not an evaluation (L6:
+  the canonical pairs informed the lookup, so they are not independent
+  evidence).
+
+UNCHANGED from v2: the misspelling generator rules (frozen, L6), the
+Birkbeck leakage firewall AS HARDENED by the refit above (weights fitted
+only on non-Dolch-target pairs AND with the attempt-overlap exclusion;
+CHES never used in training, fitting, filtering, or selection, in any
+form), vocabulary (Dolch-314 — C1b vocab growth stays held, EG F7),
+classifier recipe (LogisticRegression C=4.0, class_weight balanced, same
+negative-sampling and identity-half procedure as v1/v2), the product
+exact-match rule, and the confidence rule (`threshold_v1.json`, unchanged;
+no threshold tuned on any exam). Training-pool sampling uses the refit
+weights with the same 0.01 floor. No learned specialist is part of v3
+(S1/S3 rejected on paper in Phase 0; EG F10 keeps them dropped on pools of
+this size). No frontier-AI output in data, labels, filtering, or selection.
+Seeds: training/split seed **20261120**; exam seed **41729**.
+
+## Honest caveat carried from Phase 1 (frozen into this registration)
+V5's features ask "could this candidate have generated this attempt under
+family f?" — and the generated attempts were produced by those same
+generator families. Part of V5's +9.21 pts is therefore
+generator-consistency signal: an upper-bound-flavored number. It transfers
+to real child errors only insofar as the published taxonomy (Read 1975;
+Treiman 1993; Bear et al.) describes them. The fresh generated exam (new
+seed) and CHES — not the validation split — are where that transfer is
+judged. Per EG G7, a fresh seed from the same generator tests seed
+variation, NOT transfer; the only transfer bound is CHES (blocked).
+
+## Exams (frozen)
+- (a) Fresh generated exam: v2 generator construction with exam seed
+  41729 (per word per family, variants split BEFORE training sampling;
+  single-variant families by exam-seed coin flip; held-out families
+  letter_name + affrication entirely to the exam), pair-disjoint from the
+  v3 training pool AND excluding every (attempt, target) pair present in
+  v1's examples, v2's training pool, or v2's exam. Scored for v1, v2, and
+  v3 product rankers — matched same-exam comparison. Per-family top-1
+  reported for all three, denominators beside every figure (G13).
+- (b) Real exam: CHES filtered to Dolch-314 targets, scored for v1, v3,
+  and B0. **Status at pre-registration: BLOCKED** (OTA resolver HTTP 500,
+  2026-11-19; amalgamation will NOT be relabelled as CHES). If it remains
+  unobtainable, gate 3 is recorded as NOT EVALUATED.
+- Adversarial probes (named, report-only), same as v2: (i) homophone /
+  collision probe (top-1 0.000 by design under the exact-match rule;
+  reported, never promised fixable); (ii) out-of-vocab probe under the
+  unchanged v1 confidence rule, reported for v1, v2, v3.
+- (c) G7 generator-variant diagnostic (report-only, labelled): the th_fv
+  family has two surface realizations (th→f, th→v). A diagnostic model
+  with the v3 configuration is trained on the v3 train split MINUS all
+  th→v-realization rows, and scored on fresh th→v-only exam rows
+  (diagnostic seed 7331, pair-disjoint as in (a)). This is a robustness
+  check against rule memorization, NOT a transfer bound (G7).
+
+## Mandatory per-component ablations (report-only; v16 block style)
+On the fresh exam: control (base 16), +V4, +TH, +V3, +V5, combined
+(views-only = v3 without S2), combined + S2 (= v3 product), and
+leave-one-group-out for each of V4/TH/V3/V5. Same configurations also
+reported on the v3 validation split. A component whose removal improves
+the combined exam top-1 is reported as such — it is NOT quietly dropped;
+dropping it is a new version's lever.
+
+## Gates (ALL must pass for v3 to be keeper; frozen)
+1. Fresh generated exam (a): v3 product top-1 ≥ v1 product top-1 AND
+   v3 product top-1 ≥ v2 product top-1, on the SAME exam (EG G8 — beating
+   v2 alone establishes nothing, v2 was never keeper; reporting never
+   shortens "passed the generated-exam gate" to "passed the v2 gate").
+2. False-correction stays 0: product self-rank rate = 1.000 (314/314),
+   with S2 on and off.
+3. Real exam (b): v3 CHES top-1 ≥ v1 CHES top-1 AND v3 CHES top-1 ≥ B0
+   CHES top-1 + 0.05. (Blocked = not passed; if CHES is still blocked at
+   v3 exam time, v3 is NOT KEEPER regardless of generated numbers.)
+4. Per-family floors on the fresh exam: th_fv top-1 ≥ 0.286 and
+   cluster_reduce top-1 ≥ 0.577 (v2's exam numbers for those families).
+5. Size: product model ≤ 16 KB.
+
+## Stop rules
+A version failing any gate is rejected, no same-lever retry. Costs: every
+step local CPU, 0 Colab units. Nothing is published or pushed without
+Rusty's approval of the exact version.
+
+## Pre-training clarifications (2026-11-19, BEFORE any v3 training or exam scoring — disclosed, in the v2 amendment pattern)
+A first run of `gen_v3_data.py` under the letter of the construction above
+produced a 102-row exam covering only 4 families: for most word/family
+combinations the exam-seed's reserved variant was already present in v2's
+data (forbidden), and the construction dropped the family for that word
+instead of reserving another variant — which would have made gate 4
+(th_fv / cluster_reduce floors) unevaluable by construction, the v2
+exam-skew problem in worse form. Two clarifications, frozen before
+training:
+1. **Exam reservation among allowed variants:** per word per family, the
+   exam-seed choice is made among the variants whose (attempt, target)
+   pair is NOT in the forbidden set (v1 examples ∪ v2 train pool ∪ v2
+   exam). If at least one allowed variant exists it is reserved for the
+   exam (held-out families: exam only, as before); the remaining variants
+   form the training items as in v2's construction. A single-variant
+   family whose only variant is forbidden contributes that variant to
+   training only. Pair-disjointness and all exclusions are unchanged —
+   only the choice set for the reservation is clarified.
+2. **G7 diagnostic set:** the diagnostic exam is the subset of the fresh
+   generated exam (a) whose family is th_fv AND whose surface realization
+   is th→v. (A separate th→v file is impossible: the generator is
+   deterministic for this family, so every th→v pair already exists in
+   v2's data or the v3 pools.) The diagnostic model is trained on the v3
+   train split minus ALL th→v-realization rows and scored on those exam
+   rows, alongside v3 product and v2 on the same rows. Disclosed: v2 (and
+   v3 product) trained on th→v pairs in their own pools, so for them
+   these rows are not realization-unseen; the diagnostic's claim rests on
+   the diagnostic-model contrast — can the v3 configuration rank a
+   realization it never trained on — which is exactly the robustness
+   question G7 posed. Denominators reported (G13).
+3. **Exam exclusion set narrowed to true exam material (feasibility):**
+   a second run under clarifications 1–2 still produced a 115-row exam
+   covering only 4 families — excluding v2's TRAINING pool as well as its
+   exam consumes nearly the whole deterministic variant space (v2's own
+   results section disclosed the same consumption effect against v1's
+   examples alone), leaving th_fv and cluster_reduce at n=0 and gate 4
+   unevaluable by construction. Frozen correction: the exam excludes
+   every pair in v1's examples and in **v2's exam** (the spent exam —
+   reusing its pairs would double-use an exam), and remains pair-disjoint
+   from all v3 splits. Pairs that appeared in v2's *training pool* are
+   admissible exam material for v3. Disclosed bias: v2 trained on some
+   admissible pairs, so on those rows the matched comparison is in-sample
+   for v2 and therefore **conservative for v3** under gate 1 (v3 must
+   still match or beat v2). This is the last construction clarification;
+   the generator now runs once, below.
+
+---
+
+# v3 — RESULTS (2026-11-19, local CPU on this VM, 0 Colab units, ~11 min)
+Full numbers: `metrics_v3.json`. Scripts: `fit_weights_v3.py`,
+`gen_v3_data.py`, `train_v3.py`. Model: `model_v3.npz`, 3,482 bytes.
+Data: training pool 1,484 rows (split train 1,085 / val 245 / dev-test 154,
+seed 20261120); fresh generated exam 203 rows (exam seed 41729).
+
+## Fresh generated exam — matched same-exam scoring (n=203)
+| Ranker | top-1 | top-3 |
+|---|---|---|
+| **v3 product (views + S2)** | **0.9310** | **0.9951** |
+| v3 views-only (no S2) | 0.9310 | 0.9951 |
+| v2 product | 0.7685 | 0.9163 |
+| v1 product | 0.7286 | 0.9064 |
+| B0 Levenshtein | 0.4675 | — |
+
+Per-family top-1 (v3 / v2, denominators beside figures per G13):
+cluster_reduce (20) 0.800 / 0.600 · generic_drop (50) 0.840 / 0.780 ·
+nasal_liquid_omit (8) 1.000 / 1.000 · single_double (9) 1.000 / 1.000 ·
+th_fv (21) 0.952 / 0.333 · transpose (79) 0.987 / 0.835 ·
+vowel_swap (16) 1.000 / 0.938.
+Coverage disclosure (same consumption effect v2 recorded, stronger):
+only 7 of 20 families have exam rows — the deterministic variant space
+was largely consumed by v1's examples and v2's exam (both excluded) plus
+the v3 split; the held-out families letter_name and affrication
+contributed **0 rows** (every variant was forbidden), so this exam says
+nothing about them. Disclosed bias (clarification 3): some exam pairs
+appeared in v2's *training* pool, so v2's 0.7685 is partly in-sample and
+the gate-1 comparison is conservative for v3. The standing V5 caveat also
+applies in full: a fresh seed from the same generator tests seed
+variation, not transfer to real child errors — CHES is the only transfer
+bound, and it is still blocked.
+
+## Ablations (fresh exam top-1; validation in parentheses)
+control base-16 0.7586 (0.8490) · +V4 0.7734 (0.8408) · +TH 0.7685
+(0.8694) · +V3 0.7537 (0.8490) · **+V5 0.9310 (0.9224)** · combined
+0.9310 (0.9184) · combined−V4 0.9310 · combined−TH 0.9310 (val 0.9224 —
+removing TH improves *validation* by +0.40 pt but leaves the exam
+unchanged; reported per the pre-registration, NOT dropped — dropping it
+is a new version's lever) · combined−V3 0.9310 · combined−V5 0.8030
+(0.8490). Reading, plainly: **V5 (family posterior) carries essentially
+the entire win**; the other three groups are neutral on this exam.
+S2's exam effect is exactly zero — the exam contains no letter_name rows
+(see coverage disclosure), so there is no exam number for S2 and none is
+claimed; its component check remains a smoke check (Phase 1).
+
+## Probes (report-only)
+- Homophone collisions (n=6): v3 / v2 / v1 top-1 all 0.000 — by design
+  (exact-match rule), as pre-registered.
+- Out-of-vocab (65 attempts, unchanged v1 confidence rule): acceptance
+  v3 **0.323** vs v2 0.215 vs v1 0.185 — a named blemish: v3 *accepts
+  more* out-of-vocab attempts (its V5-driven margins trip the unchanged
+  margin ≥ 1.5 rule more often). Report-only per pre-registration; any
+  fix is a confidence-rule version of its own, not a silent retune.
+
+## G7 generator-variant diagnostic (report-only; robustness check, NOT a transfer bound)
+Diagnostic model = v3 configuration trained with all th→v-realization
+rows removed (7 train rows removed). On the fresh exam's 13 th→v rows:
+diagnostic model **1.000 (13/13)**, v3 product 1.000 (trained on th→v —
+not realization-unseen, per clarification 2), v2 product 0.4615 (6/13).
+The v3 feature configuration ranks a surface realization it never
+trained on at ceiling on this small set — evidence against pure rule
+memorization by the views, at n=13, labelled as exactly that.
+
+## False-correction
+Product self-rank 1.0000 (314/314) with S2 on and off · raw model 0.9841.
+
+## Gates
+| Gate | Result |
+|---|---|
+| 1. Fresh generated exam: v3 ≥ v1 AND v3 ≥ v2 (same exam) | **PASS** — 0.9310 ≥ 0.7286 and ≥ 0.7685 |
+| 2. False-correction stays 0 (self-rank = 1.000, S2 on/off) | **PASS** — 1.0000 / 1.0000 |
+| 3. Real exam CHES: v3 ≥ v1 AND v3 ≥ B0 + 0.05 | **NOT EVALUATED — BLOCKED** (standalone CHES file unobtainable legitimately; OTA resolver HTTP 500. Blocked = not passed.) |
+| 4. Family floors: th_fv ≥ 0.286, cluster_reduce ≥ 0.577 | **PASS** — 0.952 (n=21), 0.800 (n=20) |
+| 5. Size ≤ 16 KB | **PASS** — 3,482 B |
+
+## Verdict
+**Generated-exam gates PASS (1, 2, 4, 5); KEEPER DEFERRED to CHES.**
+Gate 3 — the frozen CHES real-exam gate — could not be evaluated, so v3
+cannot be declared keeper on this run regardless of generated-exam
+results. **v1 remains the keeper.** v3 ships internally as "candidate —
+generated-exam only" (EG F6). What unblocks the verdict: obtaining the
+OTA 0643 package with its separate CHES file and scoring v1 / v3 / B0 on
+CHES∩Dolch-314 exactly as pre-registered — the exam, gates, and trained
+model are frozen and waiting. Nothing published or pushed.
+
+---
+
+# CHES gate retired — owner decision (2026-11-19)
+
+Owner decision (Rusty, 2026-11-19 22:10 CST): drop the CHES real exam and
+move on without it. The project proceeds on generated-exam evidence.
+
+- **Background.** The standalone CHES file (one of the per-source files in
+  the Oxford Text Archive package for item 0643, the Birkbeck Spelling
+  Error Corpus) remained unobtainable across repeated attempts on
+  2026-11-19: the OTA handle resolver returned HTTP 500 and retries were
+  exhausted (recorded in the v2 pre-registration and the v3 sections
+  above). Mitton's own download page offers only the amalgamated file, in
+  which CHES rows are not separately identifiable, and relabelling
+  amalgamated rows as CHES was never an option.
+- **Decision.** Gate 3 (the CHES real-exam gate) is RETIRED — for v2, for
+  v3, and for the keeper question generally. It is not marked passed: it
+  was never evaluated. It is removed from the gate set by owner decision.
+- **Permanent consequence (binding on every public claim).** The
+  Sound-Out Speller has NEVER been scored on real children's
+  misspellings. Every accuracy figure for every version comes from
+  code-generated exams (plus validation splits of generated data). For as
+  long as that remains true, every public claim about this model must
+  carry the disclosure **"generated-exam only"** — the README's v3
+  default-model section carries it verbatim.
+- **Birkbeck handling unchanged.** The amalgamated file remains
+  eval/fitting-only under the OTA terms, locally; no Birkbeck/CHES data
+  or derived data ships, is published, or is committed to any repo.
+  Nothing about its handling changes with this retirement.
+- **Standing check.** If the standalone CHES file ever becomes
+  legitimately obtainable, scoring the frozen v1 / v2 / v3 (and B0) on
+  CHES∩Dolch-314 exactly as pre-registered remains a standing, welcome
+  check — but it no longer gates anything: not the keeper verdict, not
+  the default model.
+
+---
+
+# Verdict amendments under the CHES retirement (2026-11-19)
+
+Amended gate set after the retirement above: v3 gates 1, 2, 4, 5 (gate 3
+retired, never evaluated, NOT passed). The original verdict sections
+above are NOT rewritten — they stand as the record under the
+pre-retirement gate set.
+
+## v3 — KEEPER (under the amended gate set)
+v3's verdict is amended from "KEEPER DEFERRED to CHES" to **KEEPER**
+under the amended gate set: gate 1 PASS (fresh generated exam 0.9310 ≥
+v1 0.7286 and ≥ v2 0.7685, matched same-exam), gate 2 PASS
+(false-correction 1.0000), gate 4 PASS (th_fv 0.952 ≥ 0.286;
+cluster_reduce 0.800 ≥ 0.577), gate 5 PASS (3,482 B ≤ 16 KB); gate 3
+retired by owner decision (section above) — cited here, never restated
+as passed. Under Rusty's standing rule (passes its gates + improves →
+pushed to GitHub as the DEFAULT model; older models kept in the repo for
+comparison), v3 becomes the default model in
+RustyDrops/Sound_Out_Speller_Tiny_ML; v1 and v2 stay in the repo for
+comparison. The "generated-exam only" disclosure applies to v3 in full:
+it has never been scored on real children's misspellings.
+
+## v2 — superseded by v3 the same day; never the default
+v2's record is amended as follows (its full pre-registration and results
+sections above stand intact): under the amended gate set, v2's evaluable
+gates (1 and 2) passed, but v2 is **superseded by v3 on the same day
+(2026-11-19)** — v3 beat it on the matched fresh exam (0.9310 vs
+0.7685) and on both gated families. v2 was never declared keeper as a
+release, was never the default model in the repo, and is retained in
+the repo (`model_v2.npz`, `metrics_v2.json`) for comparison only.
