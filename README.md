@@ -1,6 +1,6 @@
 # Sound-Out Speller — tiny ML for early spellers
 
-![Sound-Out Speller](promo/sound-out-speller-promo.png)
+![Sound-Out Speller](promo/sound-out-speller-promo-v2.png)
 
 A kid hears a word, spells it the way it sounds — **wos**, **teh**, **becos** — and this
 tiny model figures out which word they meant, names the spelling pattern they missed,
@@ -68,6 +68,31 @@ this attempt as a misspelling of this candidate?" A small deterministic
 letter-name lookup (S2: r→are, u→you, c→see…) rides along at ~0 bytes.
 The full record is in `PROVENANCE.md` and `metrics_c2.json`.
 
+## How this compares
+
+Honest context for the headline number, because spellcheckers are usually
+measured very differently:
+
+- **The 95.38% is a generated exam over a closed 1,000-word vocabulary.**
+  The model only ever ranks those 1,000 words, and the exam attempts were
+  produced by the same family of phonics-error rules the generator uses —
+  so it is *not* comparable head-to-head with general spellcheckers, and
+  it is not a score on real children's writing (see the disclosure above).
+- **On real data, the improvement is real but modest.** On the
+  [Birkbeck spelling-error corpus](https://marcoszampieri.com/papers/poltal2014.pdf)
+  (36,133 misspellings of 6,136 target words, collected from real writers),
+  filtered to this model's 1,000 targets (5,499 attempts, eval-only), C2
+  ranks the right word #1 **42.64%** of the time vs **39.59%** for a plain
+  Levenshtein edit-distance baseline.
+- **General spellcheckers play a bigger game.** They rank over a
+  dictionary of ~57,000 words and use sentence context to disambiguate.
+  Child-focused research systems — e.g.
+  [KidSpell](https://scholarworks.boisestate.edu/cs_facpubs/312/)
+  (Downs et al., 2022) — are built specifically to beat general
+  spellcheckers on children's errors. This model trades that scope for
+  **6.7 KB, fully offline, no uploads**: it is a bounded practice tool for
+  a known word list, not a general-purpose spellchecker.
+
 ## How it works
 
 - **Bounded vocabulary:** 1,000 high-value words — the Dolch list (220
@@ -84,6 +109,67 @@ The full record is in `PROVENANCE.md` and `metrics_c2.json`.
   training — see `PROVENANCE.md`.
 - **Exact-match rule:** if the attempt already *is* a vocabulary word, it
   is trusted, so the product never changes a correct word.
+
+## Use it yourself
+
+### 1. In the browser (no install)
+
+Download or clone this repo and open [`demo/index.html`](demo/index.html)
+in any browser — no server, no account, nothing leaves the device.
+**Practice mode** speaks a word aloud for the speller to write;
+**Check mode** takes any sound-it-out spelling and suggests the intended
+word. Parents and teachers can paste in this week's spelling list and it
+joins the demo's vocabulary on the spot. (The demo is a self-contained
+page carrying a compact in-browser version of the model; for the current
+C2-AFFR model itself, use the Python path below.)
+
+### 2. In Python (the C2-AFFR model)
+
+You need `model_c2.npz`, `features.py`, `features_phase1.py`,
+`gen_v1_data.py`, `gen_v2_data.py`, `train_v1.py`, and `data/vocab.json`,
+all in this repo (the feature code loads the Dolch vocabulary at import).
+Inference is pure NumPy; `train_v1.py` also imports scikit-learn, so have
+both installed. This is exactly how the shipped model ranks — the
+47-feature view, the exact-match rule, and the S2 letter-name lookup:
+
+```python
+import numpy as np
+from features_phase1 import pair_features_ext, s2_lookup_rank
+
+d = np.load("model_c2.npz", allow_pickle=False)
+COEF, INTERCEPT = d["coef"], float(d["intercept"][0])
+VOCAB = [str(w) for w in d["vocab"]]
+LEVEL = {w: int(d["level_idx"][i]) for i, w in enumerate(VOCAB)}
+VOCAB_SET = set(VOCAB)
+
+def suggest(attempt, k=5):
+    a = attempt.lower().strip()
+    feats = np.array([pair_features_ext(a, c, LEVEL[c]) for c in VOCAB])
+    order = np.argsort(-(feats @ COEF + INTERCEPT), kind="stable")
+    ranked = [VOCAB[i] for i in order]
+    if a in VOCAB_SET:            # exact-match rule: never "correct" a
+        ranked.remove(a)          # word that is already spelled right
+        ranked = [a] + ranked
+    else:
+        ranked = s2_lookup_rank(a, ranked, VOCAB_SET)
+    return ranked[:k]
+
+suggest("wos")    # ['was', 'this', 'who', 'with', 'own']
+suggest("teh")    # ['the', 'ten', 'teach', 'toe', 'them']
+suggest("jress")  # ['dress', 'guess', 'grass', 'less', 'cross']
+```
+
+(Outputs verified against `model_c2.npz` as shipped. For the older v1
+model, `predict_v1.py` is a ready-made command-line runtime:
+`python3 predict_v1.py becos wos teh`.)
+
+### 3. Licence and attribution
+
+The vocabulary includes words from the New General Service List /
+New Dolch List by Browne & Culligan, licensed **CC BY-SA 4.0** — keep the
+attribution (also in `PROVENANCE.md`) and share-alike applies to the
+vocabulary list as shipped. The Birkbeck data used for evaluation is
+eval-only under its OTA terms and is not shipped in this repo.
 
 ## Previous models, kept for comparison
 
